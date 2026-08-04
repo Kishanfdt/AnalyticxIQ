@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../utils/errors.js';
 import { ERROR_CODES } from '@analyticiq/shared';
+import { Logger } from '../utils/logger.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
@@ -35,7 +36,7 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
   }
 
   // Log unhandled server exceptions internally
-  console.error('💥 Unhandled Exception:', err);
+  Logger.error('💥 Unhandled Exception', err);
 
   // 3. Fallback to Internal Server Error
   return res.status(500).json({

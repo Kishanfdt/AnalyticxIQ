@@ -91,6 +91,7 @@ model Customer {
 
   @@unique([email, businessId])
   @@index([businessId])
+  @@index([region])
 }
 
 model Sale {
@@ -110,6 +111,9 @@ model Sale {
   @@index([businessId])
   @@index([customerId])
   @@index([saleDate])
+  @@index([businessId, saleDate])
+  @@index([status])
+  @@index([salespersonId])
 }
 
 model SaleItem {
