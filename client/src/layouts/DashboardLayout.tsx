@@ -11,6 +11,7 @@ import {
   Sparkles,
   Users,
   DollarSign,
+  LayoutDashboard,
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
@@ -91,6 +92,22 @@ export const DashboardLayout: React.FC = () => {
 
           {/* Sidebar Menu Links */}
           <nav className="space-y-1.5">
+            <NavLink
+              to="/dashboard"
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
+                ${
+                  isActive
+                    ? 'bg-blue-600/10 text-blue-400 border border-blue-500/25'
+                    : 'text-zinc-400 hover:bg-zinc-800/40 hover:text-zinc-200 border border-transparent'
+                }
+              `}
+              onClick={() => setSidebarOpen(false)}
+            >
+              <LayoutDashboard className="h-4.5 w-4.5" />
+              <span>Dashboard</span>
+            </NavLink>
+
             <NavLink
               to="/products"
               end
@@ -180,7 +197,9 @@ export const DashboardLayout: React.FC = () => {
                 ? 'Customer Management'
                 : location.pathname.startsWith('/sales')
                   ? 'Sales Ledger'
-                  : 'Inventory & Products'}
+                  : location.pathname.startsWith('/dashboard')
+                    ? 'Analytics Dashboard'
+                    : 'Inventory & Products'}
             </h1>
           </div>
           <div className="text-xs font-medium text-zinc-500 bg-[#16161c] px-3 py-1.5 rounded-lg border border-zinc-800/80">

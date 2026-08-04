@@ -9,3 +9,4 @@ export { EditCustomerPage } from './EditCustomerPage';
 export { SalesListPage } from './SalesListPage';
 export { CreateSalePage } from './CreateSalePage';
 export { EditSalePage } from './EditSalePage';
+export { DashboardPage } from './DashboardPage';

@@ -14,6 +14,7 @@ import {
   SalesListPage,
   CreateSalePage,
   EditSalePage,
+  DashboardPage,
 } from './pages';
 
 // Create a single TanStack QueryClient instance
@@ -38,7 +39,8 @@ function App() {
 
             {/* Protected Dashboard Routes */}
             <Route path="/" element={<DashboardLayout />}>
-              <Route index element={<Navigate to="/products" replace />} />
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<DashboardPage />} />
               <Route path="products" element={<ProductListPage />} />
               <Route path="products/new" element={<AddProductPage />} />
               <Route path="products/:id/edit" element={<EditProductPage />} />
@@ -51,7 +53,7 @@ function App() {
             </Route>
 
             {/* Fallback Catch-all Route */}
-            <Route path="*" element={<Navigate to="/products" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
