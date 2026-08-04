@@ -131,11 +131,11 @@ AnalyticxIQ/
 
 ## 🗺️ Development Roadmap
 
-- [x] **Sprint 0**: Project Foundation & Monorepo Configuration
-- [ ] **Sprint 1**: Multi-Tenant Authentication & Session Management
-- [ ] **Sprint 2**: Products & Customers Administration (CRUD)
-- [ ] **Sprint 3**: Sales Import & Stream Ingestion Engine
-- [ ] **Sprint 4**: Business Metric Aggregations & Query Indexes
-- [ ] **Sprint 5**: Interactive Visual Dashboards
-- [ ] **Sprint 6**: UI Polish, Dark Mode, and Error Boundings
-- [ ] **Sprint 7**: Deployment Containerization & Launch
+- [x] **Sprint 0**: Project Foundation & Monorepo Setup
+- [x] **Sprint 1**: Database Foundation (PostgreSQL & Prisma models)
+- [x] **Sprint 2**: Authentication Module (JWT, Password Hashing, Centralized Error Handling)
+- [ ] **Sprint 3**: Products & Customers CRUD
+- [ ] **Sprint 4**: Sales Data Ingestion Engine (PapaParse & Transactions)
+- [ ] **Sprint 5**: Dashboards & Analytics Aggregations
+- [ ] **Sprint 6**: UI Visualization & Polish (Dark mode, Recharts)
+- [ ] **Sprint 7**: Deployment & Production Readiness
