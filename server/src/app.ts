@@ -1,7 +1,8 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { loginSchema } from '@analyticiq/shared';
 import { config } from './config/index.js';
+import authRouter from './routes/auth.routes.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
 const PORT = config.PORT;
@@ -19,27 +20,11 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-// Test endpoint to demonstrate sharing Zod schemas
-app.post('/api/v1/test-validation', (req: Request, res: Response) => {
-  const parseResult = loginSchema.safeParse(req.body);
+// API Routes
+app.use('/api/v1/auth', authRouter);
 
-  if (!parseResult.success) {
-    return res.status(400).json({
-      success: false,
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Request validation failed using shared schemas',
-        details: parseResult.error.errors,
-      },
-    });
-  }
-
-  res.json({
-    success: true,
-    message: 'Backend validated your payload successfully using shared package schemas!',
-    data: parseResult.data,
-  });
-});
+// Global Error Handler (must be mounted after all routes)
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`🚀 AnalyticxIQ Server running on port ${PORT}`);
