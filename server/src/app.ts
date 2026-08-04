@@ -5,6 +5,7 @@ import authRouter from './routes/auth.routes.js';
 import productRouter from './routes/product.routes.js';
 import customerRouter from './routes/customer.routes.js';
 import saleRouter from './routes/sale.routes.js';
+import analyticsRouter from './routes/analytics.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/products', productRouter);
 app.use('/api/v1/customers', customerRouter);
 app.use('/api/v1/sales', saleRouter);
+app.use('/api/v1/analytics', analyticsRouter);
 
 // Global Error Handler (must be mounted after all routes)
 app.use(errorHandler);
