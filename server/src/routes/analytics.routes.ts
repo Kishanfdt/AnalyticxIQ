@@ -13,5 +13,6 @@ router.get('/products', AnalyticsController.getProducts);
 router.get('/customers', AnalyticsController.getCustomers);
 router.get('/categories', AnalyticsController.getCategories);
 router.get('/trends', AnalyticsController.getTrends);
+router.get('/advanced', AnalyticsController.getAdvanced);
 
 export default router;

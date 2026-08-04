@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { api } from '../services';
-import { DeleteSaleConfirmModal } from '../components';
+import { DeleteSaleConfirmModal, ImportModal } from '../components';
 import {
   Search,
   Plus,
@@ -15,6 +15,8 @@ import {
   Calendar,
   User,
   ShoppingBag,
+  UploadCloud,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export const SalesListPage: React.FC = () => {
@@ -23,6 +25,10 @@ export const SalesListPage: React.FC = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(1);
   const limit = 10; // Items per page
+
+  // Data Ops States
+  const [exportOpen, setExportOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   // Delete sale states
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -67,7 +73,9 @@ export const SalesListPage: React.FC = () => {
       setDeleteError(null);
     },
     onError: (err: any) => {
-      setDeleteError(err.response?.data?.message || 'Failed to delete the sale transaction.');
+      setDeleteError(
+        err.response?.data?.message || 'Failed to delete the sale transaction.',
+      );
     },
   });
 
@@ -85,6 +93,37 @@ export const SalesListPage: React.FC = () => {
   const handleConfirmDelete = () => {
     if (selectedSale) {
       performDelete(selectedSale.id);
+    }
+  };
+
+  // Authenticated file export handler
+  const handleExport = async (format: 'csv' | 'excel' | 'pdf') => {
+    try {
+      const response = await api.get('/export/sales', {
+        params: {
+          format,
+          search: debouncedSearch || undefined,
+        },
+        responseType: 'blob',
+      });
+
+      const contentType = String(response.headers['content-type'] || 'text/csv');
+      const blob = new Blob([response.data], { type: contentType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      let extension = 'csv';
+      if (format === 'excel') extension = 'xlsx';
+      if (format === 'pdf') extension = 'html';
+
+      link.setAttribute('download', `sales_export_${Date.now()}.${extension}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed', error);
     }
   };
 
@@ -123,13 +162,70 @@ export const SalesListPage: React.FC = () => {
             Record and track your business sales transactions and billing items
           </p>
         </div>
-        <Link
-          to="/sales/new"
-          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl px-5 py-3 font-semibold text-sm transition-all shadow-lg hover:shadow-blue-500/20 active:scale-[0.98] shrink-0 justify-center"
-        >
-          <Plus className="h-4.5 w-4.5" />
-          <span>New Sale</span>
-        </Link>
+
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          {/* Import Button */}
+          <button
+            onClick={() => setImportModalOpen(true)}
+            className="inline-flex items-center gap-2 border border-zinc-800 bg-[#16161c]/40 hover:bg-[#16161c] text-zinc-300 hover:text-white rounded-xl px-5 py-3 font-semibold text-sm transition-all"
+          >
+            <UploadCloud className="h-4.5 w-4.5 text-zinc-400" />
+            <span>Import</span>
+          </button>
+
+          {/* Export Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setExportOpen(!exportOpen)}
+              className="inline-flex items-center gap-2 border border-zinc-800 bg-[#16161c]/40 hover:bg-[#16161c] text-zinc-300 hover:text-white rounded-xl px-5 py-3 font-semibold text-sm transition-all"
+            >
+              <FileSpreadsheet className="h-4.5 w-4.5 text-zinc-400" />
+              <span>Export</span>
+            </button>
+            {exportOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setExportOpen(false)} />
+                <div className="absolute right-0 mt-2 w-44 bg-[#0c0c0f] border border-zinc-800 rounded-xl shadow-2xl py-1.5 z-20 animate-in fade-in slide-in-from-top-1 duration-155">
+                  <button
+                    onClick={() => {
+                      handleExport('csv');
+                      setExportOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800/40"
+                  >
+                    Export CSV
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleExport('excel');
+                      setExportOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800/40"
+                  >
+                    Export Excel (XLSX)
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleExport('pdf');
+                      setExportOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800/40"
+                  >
+                    Export PDF Report
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          <Link
+            to="/sales/new"
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl px-5 py-3 font-semibold text-sm transition-all shadow-lg hover:shadow-blue-500/20 active:scale-[0.98] justify-center"
+          >
+            <Plus className="h-4.5 w-4.5" />
+            <span>New Sale</span>
+          </Link>
+        </div>
       </div>
 
       {/* 2. Search Box */}
@@ -337,6 +433,14 @@ export const SalesListPage: React.FC = () => {
         saleNumber={selectedSale?.number || ''}
         isLoading={isDeleting}
         error={deleteError}
+      />
+
+      {/* Import Modal */}
+      <ImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        resource="sales"
+        title="Import Sales Ledger Records"
       />
     </div>
   );

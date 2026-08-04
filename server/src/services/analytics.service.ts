@@ -71,4 +71,20 @@ export class AnalyticsService {
     const end = this.parseDate(endDate);
     return AnalyticsRepository.getMonthlyTrends(businessId, start, end);
   }
+
+  /**
+   * Retrieves advanced business intelligence calculations and metrics.
+   */
+  public static async getAdvancedAnalytics(businessId: string, filters: any) {
+    const startDate = filters.startDate ? this.parseDate(filters.startDate) : undefined;
+    const endDate = filters.endDate ? this.parseDate(filters.endDate) : undefined;
+
+    const parsedFilters = {
+      ...filters,
+      startDate,
+      endDate,
+    };
+
+    return AnalyticsRepository.getAdvancedAnalytics(businessId, parsedFilters);
+  }
 }

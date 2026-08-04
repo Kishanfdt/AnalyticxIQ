@@ -5,3 +5,4 @@ export { CustomerForm } from './CustomerForm';
 export { DeleteCustomerConfirmModal } from './DeleteCustomerConfirmModal';
 export { SaleForm } from './SaleForm';
 export { DeleteSaleConfirmModal } from './DeleteSaleConfirmModal';
+export { ImportModal } from './ImportModal';

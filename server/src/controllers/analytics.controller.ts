@@ -138,4 +138,37 @@ export class AnalyticsController {
       next(error);
     }
   }
+
+  /**
+   * Handles GET /analytics/advanced.
+   */
+  public static async getAdvanced(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.user || !req.user.businessId) {
+        throw new AppError('Unauthorized access.', 401, ERROR_CODES.UNAUTHORIZED);
+      }
+
+      const businessId = req.user.businessId;
+      const filters = {
+        startDate: req.query.startDate as string,
+        endDate: req.query.endDate as string,
+        productId: req.query.productId as string,
+        customerId: req.query.customerId as string,
+        categoryId: req.query.categoryId as string,
+        region: req.query.region as string,
+        salespersonId: req.query.salespersonId as string,
+        status: req.query.status as string,
+        search: req.query.search as string,
+      };
+
+      const data = await AnalyticsService.getAdvancedAnalytics(businessId, filters);
+
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
