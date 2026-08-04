@@ -1,2 +1,1 @@
-// Barrel export for database repositories
-export {};
+export { ProductRepository } from './product.repository.js';

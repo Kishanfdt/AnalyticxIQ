@@ -1,2 +1,1 @@
-// Barrel export for core domain services
-export {};
+export { ProductService } from './product.service.js';

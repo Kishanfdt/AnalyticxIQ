@@ -1,2 +1,2 @@
-// Barrel export for HTTP controllers
-export {};
+export { ProductController } from './product.controller.js';
+export { CustomerController } from './customer.controller.js';
