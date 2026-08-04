@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "description": "AnalyticxIQ - Sales Analytics Platform Monorepo Root",
-
   "workspaces": [
     "shared",
     "client",
