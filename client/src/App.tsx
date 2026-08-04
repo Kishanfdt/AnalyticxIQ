@@ -11,6 +11,9 @@ import {
   CustomerListPage,
   AddCustomerPage,
   EditCustomerPage,
+  SalesListPage,
+  CreateSalePage,
+  EditSalePage,
 } from './pages';
 
 // Create a single TanStack QueryClient instance
@@ -42,6 +45,9 @@ function App() {
               <Route path="customers" element={<CustomerListPage />} />
               <Route path="customers/new" element={<AddCustomerPage />} />
               <Route path="customers/:id/edit" element={<EditCustomerPage />} />
+              <Route path="sales" element={<SalesListPage />} />
+              <Route path="sales/new" element={<CreateSalePage />} />
+              <Route path="sales/:id/edit" element={<EditSalePage />} />
             </Route>
 
             {/* Fallback Catch-all Route */}

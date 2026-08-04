@@ -117,6 +117,7 @@ model SaleItem {
   product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
   quantity  Int
   unitPrice Decimal  @db.Decimal(12, 2)
+  discount  Decimal  @db.Decimal(5, 2) @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

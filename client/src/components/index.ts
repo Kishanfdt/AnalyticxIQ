@@ -3,3 +3,5 @@ export { ProductForm } from './ProductForm';
 export { DeleteConfirmModal } from './DeleteConfirmModal';
 export { CustomerForm } from './CustomerForm';
 export { DeleteCustomerConfirmModal } from './DeleteCustomerConfirmModal';
+export { SaleForm } from './SaleForm';
+export { DeleteSaleConfirmModal } from './DeleteSaleConfirmModal';

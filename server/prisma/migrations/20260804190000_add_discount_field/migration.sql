@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "SaleItem" ADD COLUMN "discount" DECIMAL(5,2) NOT NULL DEFAULT 0;

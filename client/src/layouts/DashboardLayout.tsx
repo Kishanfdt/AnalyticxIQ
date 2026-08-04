@@ -10,6 +10,7 @@ import {
   X,
   Sparkles,
   Users,
+  DollarSign,
 } from 'lucide-react';
 
 export const DashboardLayout: React.FC = () => {
@@ -122,6 +123,22 @@ export const DashboardLayout: React.FC = () => {
               <Users className="h-4.5 w-4.5" />
               <span>Customers</span>
             </NavLink>
+
+            <NavLink
+              to="/sales"
+              className={({ isActive }) => `
+                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
+                ${
+                  isActive
+                    ? 'bg-blue-600/10 text-blue-400 border border-blue-500/25'
+                    : 'text-zinc-400 hover:bg-zinc-800/40 hover:text-zinc-200 border border-transparent'
+                }
+              `}
+              onClick={() => setSidebarOpen(false)}
+            >
+              <DollarSign className="h-4.5 w-4.5" />
+              <span>Sales</span>
+            </NavLink>
           </nav>
         </div>
 
@@ -161,7 +178,9 @@ export const DashboardLayout: React.FC = () => {
             <h1 className="text-lg font-bold tracking-tight text-white">
               {location.pathname.startsWith('/customers')
                 ? 'Customer Management'
-                : 'Inventory & Products'}
+                : location.pathname.startsWith('/sales')
+                  ? 'Sales Ledger'
+                  : 'Inventory & Products'}
             </h1>
           </div>
           <div className="text-xs font-medium text-zinc-500 bg-[#16161c] px-3 py-1.5 rounded-lg border border-zinc-800/80">

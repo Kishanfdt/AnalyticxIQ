@@ -135,7 +135,8 @@ AnalyticxIQ/
 - [x] **Sprint 1**: Database Foundation (PostgreSQL & Prisma models)
 - [x] **Sprint 2**: Authentication Module (JWT, Password Hashing, Centralized Error Handling)
 - [x] **Sprint 3**: Products & Customers CRUD
+- [x] **Sprint 5**: Sales Management Module (CRUD, Transactions & Discounts)
 - [ ] **Sprint 4**: Sales Data Ingestion Engine (PapaParse & Transactions)
-- [ ] **Sprint 5**: Dashboards & Analytics Aggregations
+- [ ] **Sprint 6**: Dashboards & Analytics Aggregations
 - [ ] **Sprint 6**: UI Visualization & Polish (Dark mode, Recharts)
 - [ ] **Sprint 7**: Deployment & Production Readiness
