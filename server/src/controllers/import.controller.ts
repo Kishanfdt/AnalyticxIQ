@@ -25,7 +25,7 @@ export class ImportController {
         throw new AppError(
           `Failed parsing CSV file: ${parsed.errors[0].message}`,
           400,
-          ERROR_CODES.BAD_REQUEST
+          ERROR_CODES.BAD_REQUEST,
         );
       }
       return parsed.data;
@@ -44,7 +44,7 @@ export class ImportController {
       throw new AppError(
         'Invalid file format. Only CSV (.csv) and Excel (.xlsx) files are supported.',
         400,
-        ERROR_CODES.BAD_REQUEST
+        ERROR_CODES.BAD_REQUEST,
       );
     }
   }

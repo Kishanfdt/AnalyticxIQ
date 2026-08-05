@@ -1,6 +1,4 @@
 import { prisma } from '../prisma/index.js';
-import { AppError } from '../utils/errors.js';
-import { ERROR_CODES } from '@analyticiq/shared';
 
 export class ImportService {
   /**
@@ -11,7 +9,7 @@ export class ImportService {
     const invalidRows: { rowNumber: number; sku: string; reason: string }[] = [];
     const duplicates: { rowNumber: number; sku: string; reason: string }[] = [];
     const validProducts: any[] = [];
-    
+
     // 1. Get existing SKUs to detect duplicates
     const existing = await prisma.product.findMany({
       where: { businessId },
@@ -207,7 +205,6 @@ export class ImportService {
    */
   public static async importSales(businessId: string, rows: any[]) {
     const invalidRows: { rowNumber: number; reason: string }[] = [];
-    const validSalesList: any[] = [];
 
     // Pre-load all products and customers for speed and validation checks
     const dbProducts = await prisma.product.findMany({ where: { businessId } });
@@ -234,16 +231,16 @@ export class ImportService {
       const status = row.status ? String(row.status).trim() : 'COMPLETED';
 
       // 1. Validate customer
-      let customer = customerEmail 
-        ? customerMapByEmail.get(customerEmail.toLowerCase()) 
-        : customerName 
-          ? customerMapByName.get(customerName.toLowerCase()) 
+      const customer = customerEmail
+        ? customerMapByEmail.get(customerEmail.toLowerCase())
+        : customerName
+          ? customerMapByName.get(customerName.toLowerCase())
           : null;
 
       if (!customer) {
-        invalidRows.push({ 
-          rowNumber, 
-          reason: `Customer not found for email "${customerEmail}" or name "${customerName}"` 
+        invalidRows.push({
+          rowNumber,
+          reason: `Customer not found for email "${customerEmail}" or name "${customerName}"`,
         });
         continue;
       }
@@ -273,7 +270,7 @@ export class ImportService {
 
       // Build group key
       const key = `${customer.id}_${saleDate.toISOString().split('T')[0]}_${salespersonId || ''}_${status}`;
-      
+
       if (!groupedSales.has(key)) {
         groupedSales.set(key, {
           customerId: customer.id,

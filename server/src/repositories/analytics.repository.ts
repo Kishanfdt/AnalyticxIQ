@@ -42,7 +42,9 @@ export class AnalyticsRepository {
       params.push(filters.status);
     }
     if (filters.search) {
-      conditions.push(`(p.name ILIKE $${index} OR c.name ILIKE $${index} OR c.company ILIKE $${index})`);
+      conditions.push(
+        `(p.name ILIKE $${index} OR c.name ILIKE $${index} OR c.company ILIKE $${index})`,
+      );
       params.push(`%${filters.search}%`);
       index++;
     }
@@ -101,7 +103,7 @@ export class AnalyticsRepository {
         p.name AS "name",
         p.sku AS "sku",
         SUM(si.quantity)::INTEGER AS "quantitySold",
-        SUM(si.quantity * si.unitPrice)::DOUBLE PRECISION AS "revenue"
+        SUM(si.quantity * si."unitPrice")::DOUBLE PRECISION AS "revenue"
       FROM "SaleItem" si
       JOIN "Product" p ON si."productId" = p.id
       JOIN "Sale" s ON si."saleId" = s.id
@@ -151,7 +153,7 @@ export class AnalyticsRepository {
       SELECT 
         cat.id AS "categoryId",
         cat.name AS "name",
-        SUM(si.quantity * si.unitPrice)::DOUBLE PRECISION AS "revenue"
+        SUM(si.quantity * si."unitPrice")::DOUBLE PRECISION AS "revenue"
       FROM "SaleItem" si
       JOIN "Product" p ON si."productId" = p.id
       JOIN "Category" cat ON p."categoryId" = cat.id
@@ -195,8 +197,8 @@ export class AnalyticsRepository {
     const overviewQuery = `
       SELECT 
         COALESCE(SUM(si.quantity * p.price), 0)::DOUBLE PRECISION AS "grossRevenue",
-        COALESCE(SUM(si.quantity * si.unitPrice), 0)::DOUBLE PRECISION AS "netRevenue",
-        COALESCE(SUM(si.quantity * (si.unitPrice - COALESCE(p."costPrice", 0))), 0)::DOUBLE PRECISION AS "profit",
+        COALESCE(SUM(si.quantity * si."unitPrice"), 0)::DOUBLE PRECISION AS "netRevenue",
+        COALESCE(SUM(si.quantity * (si."unitPrice" - COALESCE(p."costPrice", 0))), 0)::DOUBLE PRECISION AS "profit",
         COUNT(DISTINCT s.id)::INTEGER AS "totalOrders",
         COUNT(DISTINCT s."customerId")::INTEGER AS "uniqueCustomers"
       FROM "SaleItem" si
@@ -213,7 +215,7 @@ export class AnalyticsRepository {
         p.name AS "name",
         p.sku AS "sku",
         SUM(si.quantity)::INTEGER AS "quantitySold",
-        SUM(si.quantity * si.unitPrice)::DOUBLE PRECISION AS "revenue"
+        SUM(si.quantity * si."unitPrice")::DOUBLE PRECISION AS "revenue"
       FROM "SaleItem" si
       JOIN "Product" p ON si."productId" = p.id
       JOIN "Sale" s ON si."saleId" = s.id
@@ -231,7 +233,7 @@ export class AnalyticsRepository {
         p.name AS "name",
         p.sku AS "sku",
         SUM(si.quantity)::INTEGER AS "quantitySold",
-        SUM(si.quantity * si.unitPrice)::DOUBLE PRECISION AS "revenue"
+        SUM(si.quantity * si."unitPrice")::DOUBLE PRECISION AS "revenue"
       FROM "SaleItem" si
       JOIN "Product" p ON si."productId" = p.id
       JOIN "Sale" s ON si."saleId" = s.id
@@ -249,7 +251,7 @@ export class AnalyticsRepository {
         c.name AS "name",
         c.company AS "company",
         COUNT(DISTINCT s.id)::INTEGER AS "ordersCount",
-        SUM(si.quantity * si.unitPrice)::DOUBLE PRECISION AS "totalSpent"
+        SUM(si.quantity * si."unitPrice")::DOUBLE PRECISION AS "totalSpent"
       FROM "SaleItem" si
       JOIN "Sale" s ON si."saleId" = s.id
       JOIN "Customer" c ON s."customerId" = c.id
@@ -265,7 +267,7 @@ export class AnalyticsRepository {
       SELECT 
         cat.id AS "categoryId",
         cat.name AS "name",
-        SUM(si.quantity * si.unitPrice)::DOUBLE PRECISION AS "revenue"
+        SUM(si.quantity * si."unitPrice")::DOUBLE PRECISION AS "revenue"
       FROM "SaleItem" si
       JOIN "Product" p ON si."productId" = p.id
       JOIN "Category" cat ON p."categoryId" = cat.id
@@ -280,7 +282,7 @@ export class AnalyticsRepository {
     const regionsQuery = `
       SELECT 
         COALESCE(c.region, 'Unknown') AS "region",
-        SUM(si.quantity * si.unitPrice)::DOUBLE PRECISION AS "revenue",
+        SUM(si.quantity * si."unitPrice")::DOUBLE PRECISION AS "revenue",
         COUNT(DISTINCT s.id)::INTEGER AS "ordersCount"
       FROM "SaleItem" si
       JOIN "Sale" s ON si."saleId" = s.id
@@ -295,7 +297,7 @@ export class AnalyticsRepository {
     const trendsQuery = `
       SELECT 
         TO_CHAR(s."saleDate", 'YYYY-MM') AS "month",
-        SUM(si.quantity * si.unitPrice)::DOUBLE PRECISION AS "revenue",
+        SUM(si.quantity * si."unitPrice")::DOUBLE PRECISION AS "revenue",
         COUNT(DISTINCT s.id)::INTEGER AS "ordersCount"
       FROM "SaleItem" si
       JOIN "Sale" s ON si."saleId" = s.id
@@ -307,23 +309,16 @@ export class AnalyticsRepository {
     `;
 
     // Execute queries in parallel using parameterized unsafe wrappers
-    const [
-      overviewResult,
-      topProducts,
-      lowProducts,
-      topCustomers,
-      categories,
-      regions,
-      trends,
-    ] = await Promise.all([
-      prisma.$queryRawUnsafe<any[]>(overviewQuery, ...params),
-      prisma.$queryRawUnsafe<any[]>(topProductsQuery, ...params),
-      prisma.$queryRawUnsafe<any[]>(lowProductsQuery, ...params),
-      prisma.$queryRawUnsafe<any[]>(topCustomersQuery, ...params),
-      prisma.$queryRawUnsafe<any[]>(categoriesQuery, ...params),
-      prisma.$queryRawUnsafe<any[]>(regionsQuery, ...params),
-      prisma.$queryRawUnsafe<any[]>(trendsQuery, ...params),
-    ]);
+    const [overviewResult, topProducts, lowProducts, topCustomers, categories, regions, trends] =
+      await Promise.all([
+        prisma.$queryRawUnsafe<any[]>(overviewQuery, ...params),
+        prisma.$queryRawUnsafe<any[]>(topProductsQuery, ...params),
+        prisma.$queryRawUnsafe<any[]>(lowProductsQuery, ...params),
+        prisma.$queryRawUnsafe<any[]>(topCustomersQuery, ...params),
+        prisma.$queryRawUnsafe<any[]>(categoriesQuery, ...params),
+        prisma.$queryRawUnsafe<any[]>(regionsQuery, ...params),
+        prisma.$queryRawUnsafe<any[]>(trendsQuery, ...params),
+      ]);
 
     const ov = overviewResult[0] || {
       grossRevenue: 0,
@@ -345,7 +340,7 @@ export class AnalyticsRepository {
 
     // Calculate revenue growth comparing the last two months of data
     let revenueGrowth = 0;
-    let monthlyGrowth: any[] = [];
+    const monthlyGrowth: any[] = [];
 
     if (trends.length >= 2) {
       const prev = trends[trends.length - 2].revenue || 0;
@@ -361,7 +356,8 @@ export class AnalyticsRepository {
 
       if (i > 0) {
         const prevRev = trends[i - 1].revenue || 0;
-        growthRate = prevRev > 0 ? ((currentRev - prevRev) / prevRev) * 100 : currentRev > 0 ? 100 : 0;
+        growthRate =
+          prevRev > 0 ? ((currentRev - prevRev) / prevRev) * 100 : currentRev > 0 ? 100 : 0;
       }
 
       monthlyGrowth.push({

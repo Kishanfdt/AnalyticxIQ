@@ -34,8 +34,8 @@ describe('ImportService', () => {
 
       const mockRows = [
         { sku: '', name: 'Test Product 1', price: '10.99' }, // missing SKU
-        { sku: 'SKU-001', name: '', price: '15.50' },        // missing name
-        { sku: 'SKU-002', name: 'Product 2', price: '-5.00' } // negative price
+        { sku: 'SKU-001', name: '', price: '15.50' }, // missing name
+        { sku: 'SKU-002', name: 'Product 2', price: '-5.00' }, // negative price
       ];
 
       const result = await ImportService.importProducts('business-123', mockRows);
@@ -50,9 +50,7 @@ describe('ImportService', () => {
     it('should successfully parse and insert valid product rows', async () => {
       vi.mocked(prisma.product.findMany).mockResolvedValue([]);
 
-      const mockRows = [
-        { sku: 'SKU-OK-1', name: 'Perfect Product', price: '12.00' }
-      ];
+      const mockRows = [{ sku: 'SKU-OK-1', name: 'Perfect Product', price: '12.00' }];
 
       const result = await ImportService.importProducts('business-123', mockRows);
 

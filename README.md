@@ -1,18 +1,20 @@
-# AnalyticxIQ - Sales Analytics Platform
+# AnalyticxIQ – Enterprise Sales Analytics Platform
 
-**AnalyticxIQ** is an enterprise-grade, multi-tenant SaaS Sales Analytics Platform designed to help businesses manage products, customers, transactions, and visualize business analytics through interactive dashboards.
+**AnalyticxIQ** is a production-grade, multi-tenant SaaS Sales Analytics Platform designed to help businesses manage products, customers, and transactions, and visualize business performance through interactive BI dashboards.
 
-This project is built from scratch utilizing a decoupled monorepo architecture with logical tenant isolation, ensuring security, scalability, and high performance.
+This application is built using a decoupled monorepo architecture with logical tenant isolation, joint schema validation, and database transaction safety.
 
 ---
 
 ## 🚀 Key Features
 
-- **Multi-Tenant Isolation**: Shared database with logical isolation via unified `tenantId` checking across all resources.
-- **Decoupled Client-Server**: A React Single Page Application (SPA) communicating with an Express REST API.
-- **Shared Schema Validation**: Joint validation constraints defined using Zod, shared between client inputs and server endpoints.
-- **Transaction Ingestion Engine**: Robust CSV file processor with row-level error reporting and database transaction safety.
-- **Analytical Dashboards**: Beautiful data visualizations built using Recharts with support for dark mode.
+- **Logical Tenant Isolation**: Multi-tenant database model where all data queries are logically isolated at the service/repository layer via a unified `tenantId` (linked to `businessId`).
+- **Decoupled Architecture**: A modern React SPA communicating with an Express REST API backend, using Vite dev server proxies.
+- **Dual-Token Authentication**: Secure JWT structure using short-lived memory access tokens and long-lived HTTP-only cookies for refresh tokens.
+- **Joint Schema Validation**: Shared Zod constraints package used by both the React client forms and Express endpoint validation middleware.
+- **BI Analytics Engine**: High-performance dashboard aggregations (Gross Revenue, Net Revenue, Profit margins, Monthly trends, Region/Category sales) using raw SQL queries with indexes.
+- **Stream-Based CSV Ingestion**: High-throughput CSV file parsing using PapaParse and Multer, with row-level validation and atomic database transaction safety.
+- **Data Export Engine**: Instant exports of Sales, Customers, and Products to CSV or Excel formats.
 
 ---
 
@@ -20,64 +22,82 @@ This project is built from scratch utilizing a decoupled monorepo architecture w
 
 ### Frontend
 
-- **React & TypeScript**: Interactive UI layer.
-- **Vite**: Next-generation frontend bundler.
-- **Tailwind CSS**: Utility-first CSS styling (with Dark Mode support).
-- **React Router**: Declarative client-side routing.
-- **TanStack Query (React Query)**: State cache and data-fetching layer.
-- **React Hook Form & Zod**: Fast, type-safe validation schema forms.
-- **Recharts**: Custom responsive data charting.
+- **React (v18)** & **TypeScript**: Strict-type user interface.
+- **Vite**: Frontend bundler.
+- **Tailwind CSS**: Modern styling.
+- **React Router Dom (v6)**: Declarative client routing.
+- **TanStack Query (React Query v5)**: Query caching and network state management.
+- **React Hook Form & Zod**: Form validation.
+- **Recharts**: Interactive responsive data charting.
+- **Axios**: Network client.
 
 ### Backend
 
-- **Node.js & Express**: Extensible REST API backend.
-- **TypeScript**: Type-safety throughout the server.
-- **Prisma ORM**: Relational schema database management.
-- **PostgreSQL**: High-reliability transaction storage.
-- **JWT Authentication**: Dual-token structure (Access Token in memory, Refresh Token in HttpOnly cookie).
-- **PapaParse & Multer**: Stream-based CSV file parsing.
+- **Node.js** & **Express**: Scalable REST API server.
+- **TypeScript**: Type-safety throughout the backend.
+- **Prisma ORM**: Modern database access layer.
+- **PostgreSQL**: relational transaction storage.
+- **BcryptJS**: Password hashing.
+- **Helmet & Express Rate Limit**: Production security hardening.
+
+### Shared Workspace
+
+- **Zod Schemas**: Reusable validation rules for products, sales, customers, and authentication.
+- **Constants**: System-wide pagination limits and error code constants.
 
 ---
 
-## 📂 Project Structure
+## 📐 System Architecture
 
-```text
-AnalyticxIQ/
-├── package.json               # Root workspaces configuration
-├── tsconfig.json              # Shared TypeScript base configuration
-├── eslint.config.js           # Flat ESLint workspace configurations
-├── .prettierrc                # Prettier styling rules
-├── shared/                    # Validation schemas and constants library
-│   ├── src/
-│   │   ├── constants/         # Shared pagination and error codes
-│   │   └── validation/        # Zod request validation definitions
-│   └── tsconfig.json
-├── client/                    # Vite + React Single Page App
-│   ├── src/
-│   │   ├── components/        # Reusable global UI widgets
-│   │   ├── features/          # Domain features (auth, sales, products)
-│   │   ├── layouts/           # Page structural components
-│   │   └── App.tsx
-│   └── vite.config.ts
-└── server/                    # Node.js + Express REST API
-    ├── prisma/
-    │   └── schema.prisma      # Relational database models
-    ├── src/
-    │   ├── config/            # Schema-verified environment settings
-    │   ├── controllers/       # HTTP route handlers
-    │   ├── prisma/            # Prisma Client Singleton
-    │   └── app.ts
-    └── tsconfig.json
+```mermaid
+graph TD
+  subgraph Frontend [React SPA Client - Port 3000]
+    UI[React Views & UI Components]
+    R[React Router]
+    TQ[TanStack Query]
+    RHF[React Hook Form]
+  end
+
+  subgraph Shared [Shared Library Workspace]
+    ZS[Zod Validation Schemas]
+    C[Error & Status Constants]
+  end
+
+  subgraph Backend [Express API Server - Port 5000]
+    App[Express App]
+    MW[Helmet / Rate Limit / Auth Middleware]
+    Val[Request Validators]
+    Ctrl[Route Controllers]
+    Repo[Repository Queries]
+  end
+
+  subgraph Database [Storage Layer]
+    P[Prisma Client]
+    DB[(PostgreSQL)]
+  end
+
+  UI --> R
+  UI --> TQ
+  TQ -->|Axios JSON HTTP| App
+  RHF -->|validate| ZS
+  Val -->|validate| ZS
+  App --> MW
+  MW --> Val
+  Val --> Ctrl
+  Ctrl --> Repo
+  Repo --> P
+  P --> DB
 ```
 
 ---
 
-## ⚙️ Configuration & Standards
+## 📂 Monorepo Structure
 
-- **TypeScript Strict Mode**: Fully enabled across all workspaces.
-- **Absolute Imports**: Configured using `@/*` mapping pointing to `src/` in the client and server.
-- **ESLint Flat Config**: Root-level linting across all files.
-- **Prettier Formatting**: Unified formatting rules (semi-colons, single quotes, double spaces).
+- [`shared/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/shared): Common models, schemas, and error definitions.
+- [`client/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/client): Vite + React frontend code.
+- [`server/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/server): Express.js + Prisma backend code.
+
+For a detailed walkthrough of the directories, see the [Folder Structure Documentation](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/docs/FOLDER_STRUCTURE.md).
 
 ---
 
@@ -86,7 +106,8 @@ AnalyticxIQ/
 ### Prerequisites
 
 - Node.js (v18+)
-- npm (v7+) or pnpm
+- npm (v8+)
+- PostgreSQL 15+
 
 ### Installation
 
@@ -97,46 +118,95 @@ AnalyticxIQ/
    ```
 2. Install workspace dependencies:
    ```bash
-   npm install --legacy-peer-deps
+   npm install
    ```
-
-### Development Scripts
-
-- **Compile Shared Package**:
-  ```bash
-  npm run build:shared
-  ```
-- **Run Backend API Server (Port 5000)**:
-  ```bash
-  npm run dev:server
-  ```
-- **Run Frontend Vite Dev Server (Port 3000)**:
-  ```bash
-  npm run dev:client
-  ```
-- **Compile Full Monorepo**:
-  ```bash
-  npm run build
-  ```
-- **Format Codebase**:
-  ```bash
-  npm run format
-  ```
-- **Lint Codebase**:
-  ```bash
-  npm run lint
-  ```
+3. Compile the shared types library:
+   ```bash
+   npm run build:shared
+   ```
 
 ---
 
-## 🗺️ Development Roadmap
+## ⚙️ Environment Variables
 
-- [x] **Sprint 0**: Project Foundation & Monorepo Setup
-- [x] **Sprint 1**: Database Foundation (PostgreSQL & Prisma models)
-- [x] **Sprint 2**: Authentication Module (JWT, Password Hashing, Centralized Error Handling)
-- [x] **Sprint 3**: Products & Customers CRUD
-- [x] **Sprint 5**: Sales Management Module (CRUD, Transactions & Discounts)
-- [ ] **Sprint 4**: Sales Data Ingestion Engine (PapaParse & Transactions)
-- [ ] **Sprint 6**: Dashboards & Analytics Aggregations
-- [ ] **Sprint 6**: UI Visualization & Polish (Dark mode, Recharts)
-- [ ] **Sprint 7**: Deployment & Production Readiness
+Create a `.env` file in the [`server/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/server) directory.
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/analyticiq?schema=public"
+PORT=5000
+NODE_ENV="development"
+JWT_SECRET="your-super-secure-jwt-key"
+```
+
+---
+
+## 💻 Running Locally
+
+### 1. Run PostgreSQL Server
+
+Ensure PostgreSQL is running locally on port 5432.
+
+### 2. Apply Migrations & Generate Client
+
+Apply schema migrations and generate the Prisma client:
+
+```bash
+npm run prisma:migrate --workspace=server
+```
+
+### 3. Run Applications
+
+Run the client and server concurrently in development mode:
+
+```bash
+# Terminal 1: Run Backend (Port 5000)
+npm run dev:server
+
+# Terminal 2: Run Frontend (Port 3000)
+npm run dev:client
+```
+
+---
+
+## 🖥️ Screen Views
+
+_Visual walkthroughs of key components inside AnalyticxIQ:_
+
+|                 Dashboard Overview                  |                  Sales Ingestion (CSV)                  |
+| :-------------------------------------------------: | :-----------------------------------------------------: |
+| ![Dashboard Mockup](docs/screenshots/dashboard.png) | ![CSV Ingestion Mockup](docs/screenshots/ingestion.png) |
+
+_(Real application view captures are available in the [Walkthrough report](file:///C:/Users/ckish/.gemini/antigravity-ide/brain/3617fae0-0c70-44ba-aacf-e2756bc68892/walkthrough.md))_
+
+---
+
+## 🔌 API Endpoints Summary
+
+| Endpoint                     |     Method     |  Auth   | Description                           |
+| :--------------------------- | :------------: | :-----: | :------------------------------------ |
+| `/api/v1/auth/register`      |     `POST`     | Public  | Register new tenant and owner         |
+| `/api/v1/auth/login`         |     `POST`     | Public  | Authenticate user and return token    |
+| `/api/v1/auth/me`            |     `GET`      | Private | Retrieve active user session info     |
+| `/api/v1/products`           | `GET` / `POST` | Private | List or create products               |
+| `/api/v1/customers`          | `GET` / `POST` | Private | List or create customers              |
+| `/api/v1/sales`              | `GET` / `POST` | Private | List or create sales transactions     |
+| `/api/v1/analytics/advanced` |     `GET`      | Private | Fetch aggregate business intelligence |
+| `/api/v1/import/products`    |     `POST`     | Private | Batch upload products from CSV        |
+| `/api/v1/export/sales`       |     `GET`      | Private | Download sales logs                   |
+
+Refer to the complete [API Documentation](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/docs/API_DOCUMENTATION.md) for request/response schemas.
+
+---
+
+## 🔮 Future Improvements
+
+1.  **Granular Role-Based Access Control (RBAC)**: Support separate permissions for `MEMBER` and `ADMIN` roles.
+2.  **Multi-Currency Support**: Dynamic currency conversions for global sales pipelines.
+3.  **Real-time Live Charts**: Integrating Socket.io to sync dashboard data on new sales without manual page refresh.
+4.  **Webhooks**: Build automated endpoints to notify third-party shipping or accounting services on transaction completions.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

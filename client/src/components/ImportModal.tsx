@@ -3,15 +3,15 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
-import { 
-  X, 
-  UploadCloud, 
-  FileText, 
-  CheckCircle, 
-  AlertTriangle, 
-  Loader2, 
-  FileSpreadsheet, 
-  Play 
+import {
+  X,
+  UploadCloud,
+  FileText,
+  CheckCircle,
+  AlertTriangle,
+  Loader2,
+  FileSpreadsheet,
+  Play,
 } from 'lucide-react';
 
 interface ImportModalProps {
@@ -21,12 +21,7 @@ interface ImportModalProps {
   title: string;
 }
 
-export const ImportModal: React.FC<ImportModalProps> = ({
-  isOpen,
-  onClose,
-  resource,
-  title,
-}) => {
+export const ImportModal: React.FC<ImportModalProps> = ({ isOpen, onClose, resource, title }) => {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -82,9 +77,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({
       }
     },
     onError: (err: any) => {
-      setImportError(
-        err.response?.data?.message || 'File upload failed. Please verify format.'
-      );
+      setImportError(err.response?.data?.message || 'File upload failed. Please verify format.');
     },
   });
 
@@ -187,12 +180,13 @@ export const ImportModal: React.FC<ImportModalProps> = ({
 
       {/* Modal Card */}
       <div className="relative bg-[#0c0c0f] border border-zinc-800 rounded-3xl max-w-2xl w-full p-6 shadow-2xl overflow-y-auto max-h-[85vh] animate-in fade-in zoom-in duration-200">
-        
         {/* Header */}
         <div className="flex items-center justify-between border-b border-zinc-800/60 pb-4 mb-6">
           <div>
             <h3 className="text-lg font-bold text-white">{title}</h3>
-            <p className="text-xs text-zinc-500">Upload bulk data records via CSV or Excel sheets</p>
+            <p className="text-xs text-zinc-500">
+              Upload bulk data records via CSV or Excel sheets
+            </p>
           </div>
           <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
             <X className="h-5 w-5" />
@@ -209,8 +203,8 @@ export const ImportModal: React.FC<ImportModalProps> = ({
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
             className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-200 ${
-              dragActive 
-                ? 'border-blue-500 bg-blue-500/5' 
+              dragActive
+                ? 'border-blue-500 bg-blue-500/5'
                 : 'border-zinc-850 bg-[#16161c]/30 hover:border-zinc-700 hover:bg-[#16161c]/50'
             }`}
           >
@@ -223,7 +217,9 @@ export const ImportModal: React.FC<ImportModalProps> = ({
             />
             <UploadCloud className="h-10 w-10 text-zinc-500 mx-auto mb-4" />
             <p className="text-sm font-semibold text-white">Drag & drop your files here</p>
-            <p className="text-xs text-zinc-500 mt-1">Accepts raw CSV (.csv) or Excel worksheets (.xlsx)</p>
+            <p className="text-xs text-zinc-500 mt-1">
+              Accepts raw CSV (.csv) or Excel worksheets (.xlsx)
+            </p>
           </div>
         ) : (
           // File preview & actions
@@ -239,9 +235,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                   <div className="text-sm font-semibold text-white truncate max-w-[280px]">
                     {file.name}
                   </div>
-                  <div className="text-xs text-zinc-500">
-                    {(file.size / 1024).toFixed(1)} KB
-                  </div>
+                  <div className="text-xs text-zinc-500">{(file.size / 1024).toFixed(1)} KB</div>
                 </div>
               </div>
               {!isImporting && !importSummary && (
@@ -265,7 +259,9 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                     <thead>
                       <tr className="border-b border-zinc-800 bg-[#16161c]/40 text-zinc-400 uppercase">
                         {previewHeaders.map((h) => (
-                          <th key={h} className="p-2">{h}</th>
+                          <th key={h} className="p-2">
+                            {h}
+                          </th>
                         ))}
                       </tr>
                     </thead>
@@ -273,7 +269,9 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                       {previewRows.map((row, idx) => (
                         <tr key={idx} className="hover:bg-zinc-800/5">
                           {previewHeaders.map((h) => (
-                            <td key={h} className="p-2 max-w-[120px] truncate">{row[h]}</td>
+                            <td key={h} className="p-2 max-w-[120px] truncate">
+                              {row[h]}
+                            </td>
                           ))}
                         </tr>
                       ))}
@@ -291,7 +289,7 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                   Uploading and executing rollback safety checks...
                 </div>
                 <div className="w-full bg-[#16161c] rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
@@ -314,17 +312,27 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                   <CheckCircle className="h-7 w-7" />
                   <div>
                     <h4 className="text-base font-bold text-white">Import Complete</h4>
-                    <p className="text-xs text-zinc-500">The batch import was committed successfully</p>
+                    <p className="text-xs text-zinc-500">
+                      The batch import was committed successfully
+                    </p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 pt-2">
                   <div className="bg-[#16161c]/40 border border-zinc-800 p-3.5 rounded-xl">
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Imported Rows</span>
-                    <span className="text-xl font-bold text-white">{importSummary.importedCount}</span>
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">
+                      Imported Rows
+                    </span>
+                    <span className="text-xl font-bold text-white">
+                      {importSummary.importedCount}
+                    </span>
                   </div>
                   <div className="bg-[#16161c]/40 border border-zinc-800 p-3.5 rounded-xl">
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Duplicates Skipped</span>
-                    <span className="text-xl font-bold text-white">{importSummary.duplicatesCount || 0}</span>
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">
+                      Duplicates Skipped
+                    </span>
+                    <span className="text-xl font-bold text-white">
+                      {importSummary.duplicatesCount || 0}
+                    </span>
                   </div>
                 </div>
                 <button
@@ -344,7 +352,8 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                   <div>
                     <h4 className="text-sm font-bold text-white">Import Rejected (Rolled Back)</h4>
                     <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                      No rows were imported. We encountered validation failures listed below. Please fix these rows in your source sheet and retry upload.
+                      No rows were imported. We encountered validation failures listed below. Please
+                      fix these rows in your source sheet and retry upload.
                     </p>
                   </div>
                 </div>
@@ -363,7 +372,9 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                           <span className="text-zinc-300 font-medium">{err.reason}</span>
                         </div>
                         {err.sku && (
-                          <span className="text-[10px] text-zinc-500 font-mono">SKU: {err.sku}</span>
+                          <span className="text-[10px] text-zinc-500 font-mono">
+                            SKU: {err.sku}
+                          </span>
                         )}
                         {err.email && (
                           <span className="text-[10px] text-zinc-500 font-mono">{err.email}</span>
@@ -407,7 +418,6 @@ export const ImportModal: React.FC<ImportModalProps> = ({
                 </button>
               </div>
             )}
-
           </div>
         )}
       </div>

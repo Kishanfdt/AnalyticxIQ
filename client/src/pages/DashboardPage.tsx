@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../services';
-import { 
-  DollarSign, 
-  ShoppingBag, 
-  TrendingUp, 
+import {
+  DollarSign,
+  ShoppingBag,
+  TrendingUp,
   TrendingDown,
-  Users, 
-  ArrowUpRight, 
+  Users,
+  ArrowUpRight,
   AlertCircle,
   Package,
   Layers,
@@ -19,23 +19,23 @@ import {
   Download,
   Percent,
   Map as MapIcon,
-  Activity
+  Activity,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { 
-  ResponsiveContainer, 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  PieChart, 
-  Pie, 
-  Cell, 
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
   Legend,
   BarChart,
   Bar,
-  CartesianGrid
+  CartesianGrid,
 } from 'recharts';
 
 export const DashboardPage: React.FC = () => {
@@ -96,11 +96,11 @@ export const DashboardPage: React.FC = () => {
   const categories = Array.from(categoriesMap.entries()).map(([id, name]) => ({ id, name }));
 
   // 3. Fetch Advanced Analytics KPIs & Series
-  const { 
-    data: analytics, 
-    isLoading: isLoadingAnalytics, 
-    isError: isErrorAnalytics, 
-    refetch: refetchAnalytics 
+  const {
+    data: analytics,
+    isLoading: isLoadingAnalytics,
+    isError: isErrorAnalytics,
+    refetch: refetchAnalytics,
   } = useQuery({
     queryKey: ['advanced-analytics', activeParams],
     queryFn: async () => {
@@ -194,7 +194,8 @@ export const DashboardPage: React.FC = () => {
         <div className="space-y-2">
           <h3 className="text-xl font-bold text-white">Business Intelligence Failure</h3>
           <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
-            We encountered a connection issue compiling your business reports. Let's try to reload the transaction logs.
+            We encountered a connection issue compiling your business reports. Let's try to reload
+            the transaction logs.
           </p>
         </div>
         <button
@@ -209,7 +210,13 @@ export const DashboardPage: React.FC = () => {
   }
 
   // Check if no transactions at all
-  const isLedgerEmpty = !isLoadingAnalytics && analytics && Number(analytics.totalOrders) === 0 && !search && !startDate && !endDate;
+  const isLedgerEmpty =
+    !isLoadingAnalytics &&
+    analytics &&
+    Number(analytics.totalOrders) === 0 &&
+    !search &&
+    !startDate &&
+    !endDate;
 
   if (isLedgerEmpty) {
     return (
@@ -218,9 +225,12 @@ export const DashboardPage: React.FC = () => {
           <Activity className="h-8 w-8 text-zinc-400 animate-pulse" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-white font-sans tracking-tight">Analytics Ledger Empty</h3>
+          <h3 className="text-xl font-bold text-white font-sans tracking-tight">
+            Analytics Ledger Empty
+          </h3>
           <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
-            Record client transactions to activate the advanced Business Intelligence dashboards and growth trend reports automatically.
+            Record client transactions to activate the advanced Business Intelligence dashboards and
+            growth trend reports automatically.
           </p>
         </div>
         <Link
@@ -236,7 +246,6 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      
       {/* 1. Dashboard Controls Toolbar */}
       <div className="bg-[#0c0c0f] border border-zinc-800/80 rounded-2xl p-5 shadow-xl space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -245,7 +254,9 @@ export const DashboardPage: React.FC = () => {
               <SlidersHorizontal className="h-5 w-5 text-blue-500" />
               <span>Interactive Filters</span>
             </h2>
-            <p className="text-xs text-zinc-500">Apply granular parameters to segment reporting metrics</p>
+            <p className="text-xs text-zinc-500">
+              Apply granular parameters to segment reporting metrics
+            </p>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -255,7 +266,9 @@ export const DashboardPage: React.FC = () => {
               className="inline-flex items-center gap-2 border border-zinc-800 bg-[#16161c]/40 hover:bg-[#16161c] text-zinc-350 hover:text-white rounded-xl px-4 py-2.5 text-xs font-semibold transition-all"
             >
               <span>{filtersExpanded ? 'Hide Filters' : 'Expand Filters'}</span>
-              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${filtersExpanded ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                className={`h-4 w-4 transition-transform duration-200 ${filtersExpanded ? 'rotate-180' : ''}`}
+              />
             </button>
 
             {/* Export Dropdown */}
@@ -269,22 +282,34 @@ export const DashboardPage: React.FC = () => {
               </button>
               {exportDropdownOpen && (
                 <>
-                  <div className="fixed inset-0 z-10" onClick={() => setExportDropdownOpen(false)} />
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setExportDropdownOpen(false)}
+                  />
                   <div className="absolute right-0 mt-2 w-44 bg-[#0c0c0f] border border-zinc-800 rounded-xl shadow-2xl py-1.5 z-20 animate-in fade-in slide-in-from-top-1 duration-155">
                     <button
-                      onClick={() => { handleExport('csv'); setExportDropdownOpen(false); }}
+                      onClick={() => {
+                        handleExport('csv');
+                        setExportDropdownOpen(false);
+                      }}
                       className="w-full text-left px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800/40"
                     >
                       Export CSV Summary
                     </button>
                     <button
-                      onClick={() => { handleExport('excel'); setExportDropdownOpen(false); }}
+                      onClick={() => {
+                        handleExport('excel');
+                        setExportDropdownOpen(false);
+                      }}
                       className="w-full text-left px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800/40"
                     >
                       Export Excel (XLSX)
                     </button>
                     <button
-                      onClick={() => { handleExport('pdf'); setExportDropdownOpen(false); }}
+                      onClick={() => {
+                        handleExport('pdf');
+                        setExportDropdownOpen(false);
+                      }}
                       className="w-full text-left px-4 py-2 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800/40"
                     >
                       Export PDF Report
@@ -297,7 +322,15 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Granular Filters Grid */}
-        {(filtersExpanded || search || startDate || endDate || productId || customerId || categoryId || region || status) && (
+        {(filtersExpanded ||
+          search ||
+          startDate ||
+          endDate ||
+          productId ||
+          customerId ||
+          categoryId ||
+          region ||
+          status) && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-3 border-t border-zinc-800/40 animate-in fade-in slide-in-from-top-2 duration-200">
             {/* Search Input */}
             <div className="sm:col-span-2">
@@ -351,7 +384,9 @@ export const DashboardPage: React.FC = () => {
               >
                 <option value="">-- All Products --</option>
                 {products.map((p: any) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -368,7 +403,9 @@ export const DashboardPage: React.FC = () => {
               >
                 <option value="">-- All Customers --</option>
                 {customers.map((c: any) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -385,7 +422,9 @@ export const DashboardPage: React.FC = () => {
               >
                 <option value="">-- All Categories --</option>
                 {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -461,7 +500,9 @@ export const DashboardPage: React.FC = () => {
           <div className="absolute top-0 right-0 h-20 w-20 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
           <div className="space-y-3">
             <div className="flex justify-between items-start">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Gross / Net Sales</span>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
+                Gross / Net Sales
+              </span>
               <span className="h-9 w-9 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center">
                 <DollarSign className="h-4.5 w-4.5" />
               </span>
@@ -474,9 +515,12 @@ export const DashboardPage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <div className="text-xl font-black text-white">{formatCurrency(analytics?.netRevenue)}</div>
+                  <div className="text-xl font-black text-white">
+                    {formatCurrency(analytics?.netRevenue)}
+                  </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    Gross: <span className="font-semibold">{formatCurrency(analytics?.grossRevenue)}</span>
+                    Gross:{' '}
+                    <span className="font-semibold">{formatCurrency(analytics?.grossRevenue)}</span>
                   </div>
                 </>
               )}
@@ -487,7 +531,11 @@ export const DashboardPage: React.FC = () => {
                 <span>Discount Leakage</span>
                 <span className="text-rose-400 flex items-center gap-0.5">
                   <Percent className="h-3 w-3" />
-                  {(((analytics.grossRevenue - analytics.netRevenue) / analytics.grossRevenue) * 100).toFixed(1)}%
+                  {(
+                    ((analytics.grossRevenue - analytics.netRevenue) / analytics.grossRevenue) *
+                    100
+                  ).toFixed(1)}
+                  %
                 </span>
               </div>
             )}
@@ -499,7 +547,9 @@ export const DashboardPage: React.FC = () => {
           <div className="absolute top-0 right-0 h-20 w-20 bg-violet-500/5 rounded-full blur-2xl pointer-events-none" />
           <div className="space-y-3">
             <div className="flex justify-between items-start">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Growth Indicators</span>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
+                Growth Indicators
+              </span>
               <span className="h-9 w-9 bg-violet-500/10 border border-violet-500/20 text-violet-400 rounded-lg flex items-center justify-center">
                 <TrendingUp className="h-4.5 w-4.5" />
               </span>
@@ -513,7 +563,8 @@ export const DashboardPage: React.FC = () => {
               ) : (
                 <>
                   <div className="text-xl font-black text-white">
-                    {analytics?.revenueGrowth >= 0 ? '+' : ''}{analytics?.revenueGrowth?.toFixed(1)}%
+                    {analytics?.revenueGrowth >= 0 ? '+' : ''}
+                    {analytics?.revenueGrowth?.toFixed(1)}%
                   </div>
                   <div className="text-xs text-zinc-500 mt-1">Month-over-Month split</div>
                 </>
@@ -542,7 +593,9 @@ export const DashboardPage: React.FC = () => {
           <div className="absolute top-0 right-0 h-20 w-20 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
           <div className="space-y-3">
             <div className="flex justify-between items-start">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Profit & Margin</span>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
+                Profit & Margin
+              </span>
               <span className="h-9 w-9 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg flex items-center justify-center">
                 <Percent className="h-4.5 w-4.5" />
               </span>
@@ -555,9 +608,14 @@ export const DashboardPage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <div className="text-xl font-black text-white">{analytics?.profitMargin?.toFixed(1)}%</div>
+                  <div className="text-xl font-black text-white">
+                    {analytics?.profitMargin?.toFixed(1)}%
+                  </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    Profit: <span className="font-semibold text-white">{formatCurrency(analytics?.profit)}</span>
+                    Profit:{' '}
+                    <span className="font-semibold text-white">
+                      {formatCurrency(analytics?.profit)}
+                    </span>
                   </div>
                 </>
               )}
@@ -567,7 +625,7 @@ export const DashboardPage: React.FC = () => {
               <div className="pt-2.5 border-t border-zinc-800/40 flex items-center justify-between text-[10px] font-semibold text-zinc-500">
                 <span>Cost of Goods Sold (COGS)</span>
                 <span className="text-zinc-400 font-semibold">
-                  {formatCurrency((analytics.netRevenue - analytics.profit))}
+                  {formatCurrency(analytics.netRevenue - analytics.profit)}
                 </span>
               </div>
             )}
@@ -579,7 +637,9 @@ export const DashboardPage: React.FC = () => {
           <div className="absolute top-0 right-0 h-20 w-20 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
           <div className="space-y-3">
             <div className="flex justify-between items-start">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Orders & AOV</span>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
+                Orders & AOV
+              </span>
               <span className="h-9 w-9 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-lg flex items-center justify-center">
                 <ShoppingBag className="h-4.5 w-4.5" />
               </span>
@@ -592,9 +652,14 @@ export const DashboardPage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <div className="text-xl font-black text-white">{analytics?.totalOrders} Orders</div>
+                  <div className="text-xl font-black text-white">
+                    {analytics?.totalOrders} Orders
+                  </div>
                   <div className="text-xs text-zinc-500 mt-1">
-                    AOV: <span className="font-semibold text-white">{formatCurrency(analytics?.averageOrderValue)}</span>
+                    AOV:{' '}
+                    <span className="font-semibold text-white">
+                      {formatCurrency(analytics?.averageOrderValue)}
+                    </span>
                   </div>
                 </>
               )}
@@ -618,7 +683,9 @@ export const DashboardPage: React.FC = () => {
         <div className="bg-[#0c0c0f] border border-zinc-800/80 rounded-2xl p-6 shadow-xl lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Monthly MoM Growth & Revenue</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">
+                Monthly MoM Growth & Revenue
+              </h3>
               <p className="text-xs text-zinc-500">Chronological analysis of store performance</p>
             </div>
             <TrendingUp className="h-4.5 w-4.5 text-zinc-500" />
@@ -631,26 +698,59 @@ export const DashboardPage: React.FC = () => {
               </div>
             ) : !analytics?.monthlyGrowth || analytics.monthlyGrowth.length === 0 ? (
               <div className="h-full border border-zinc-800/40 bg-zinc-950/10 rounded-xl flex flex-col items-center justify-center text-center p-4">
-                <span className="text-zinc-600 text-xs font-medium">No sales logged in selected period</span>
+                <span className="text-zinc-600 text-xs font-medium">
+                  No sales logged in selected period
+                </span>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={analytics.monthlyGrowth} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart
+                  data={analytics.monthlyGrowth}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25} />
                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="month" stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
+                  <XAxis
+                    dataKey="month"
+                    stroke="#52525b"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#52525b"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(v) => `$${v}`}
+                  />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0c0c0f', border: '1px solid #27272a', borderRadius: '12px' }}
+                    contentStyle={{
+                      backgroundColor: '#0c0c0f',
+                      border: '1px solid #27272a',
+                      borderRadius: '12px',
+                    }}
                     labelStyle={{ color: '#fff', fontSize: '11px', fontWeight: 'bold' }}
                     itemStyle={{ fontSize: '12px' }}
-                    formatter={(value: any, name: any) => [name === 'growthRate' ? `${Number(value).toFixed(1)}%` : formatCurrency(value), name === 'growthRate' ? 'Growth Rate' : 'Revenue']}
+                    formatter={(value: any, name: any) => [
+                      name === 'growthRate'
+                        ? `${Number(value).toFixed(1)}%`
+                        : formatCurrency(value),
+                      name === 'growthRate' ? 'Growth Rate' : 'Revenue',
+                    ]}
                   />
-                  <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorRevenue)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             )}
@@ -661,7 +761,9 @@ export const DashboardPage: React.FC = () => {
         <div className="bg-[#0c0c0f] border border-zinc-800/80 rounded-2xl p-6 shadow-xl space-y-6">
           <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Revenue by Category</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">
+                Revenue by Category
+              </h3>
               <p className="text-xs text-zinc-500">Distribution share of categories</p>
             </div>
             <Layers className="h-4.5 w-4.5 text-zinc-500" />
@@ -694,13 +796,17 @@ export const DashboardPage: React.FC = () => {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0c0c0f', border: '1px solid #27272a', borderRadius: '12px' }}
+                    contentStyle={{
+                      backgroundColor: '#0c0c0f',
+                      border: '1px solid #27272a',
+                      borderRadius: '12px',
+                    }}
                     itemStyle={{ fontSize: '12px' }}
                     formatter={(value: any) => [formatCurrency(value), 'Revenue']}
                   />
-                  <Legend 
-                    layout="horizontal" 
-                    verticalAlign="bottom" 
+                  <Legend
+                    layout="horizontal"
+                    verticalAlign="bottom"
                     align="center"
                     iconType="circle"
                     iconSize={8}
@@ -717,7 +823,9 @@ export const DashboardPage: React.FC = () => {
       <div className="bg-[#0c0c0f] border border-zinc-800/80 rounded-2xl p-6 shadow-xl space-y-6">
         <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Sales By Region</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">
+              Sales By Region
+            </h3>
             <p className="text-xs text-zinc-500">Regional sales revenue and order counts</p>
           </div>
           <MapIcon className="h-4.5 w-4.5 text-zinc-500" />
@@ -734,12 +842,31 @@ export const DashboardPage: React.FC = () => {
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={analytics.salesByRegion} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <BarChart
+                data={analytics.salesByRegion}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                <XAxis dataKey="region" stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#52525b" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
+                <XAxis
+                  dataKey="region"
+                  stroke="#52525b"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#52525b"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(v) => `$${v}`}
+                />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0c0c0f', border: '1px solid #27272a', borderRadius: '12px' }}
+                  contentStyle={{
+                    backgroundColor: '#0c0c0f',
+                    border: '1px solid #27272a',
+                    borderRadius: '12px',
+                  }}
                   itemStyle={{ fontSize: '12px', color: '#10b981' }}
                   formatter={(value: any) => [formatCurrency(value), 'Revenue']}
                 />
@@ -752,12 +879,13 @@ export const DashboardPage: React.FC = () => {
 
       {/* 5. Drill-Down detail tables row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
         {/* Products Split: Top Performing vs Low Selling Products */}
         <div className="bg-[#0c0c0f] border border-zinc-800/80 rounded-2xl p-6 shadow-xl space-y-4">
           <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Best vs Low Selling Products</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">
+                Best vs Low Selling Products
+              </h3>
               <p className="text-xs text-zinc-500">Identify inventory movers and low performers</p>
             </div>
             <Package className="h-4.5 w-4.5 text-zinc-500" />
@@ -771,19 +899,33 @@ export const DashboardPage: React.FC = () => {
               </h4>
               <div className="space-y-2 max-h-56 overflow-y-auto">
                 {isLoadingAnalytics ? (
-                  [...Array(3)].map((_, i) => <div key={i} className="h-10 bg-zinc-900 rounded-lg animate-pulse" />)
-                ) : !analytics?.topPerformingProducts || analytics.topPerformingProducts.length === 0 ? (
+                  [...Array(3)].map((_, i) => (
+                    <div key={i} className="h-10 bg-zinc-900 rounded-lg animate-pulse" />
+                  ))
+                ) : !analytics?.topPerformingProducts ||
+                  analytics.topPerformingProducts.length === 0 ? (
                   <div className="text-zinc-650 text-xs py-4 text-center">No data available</div>
                 ) : (
                   analytics.topPerformingProducts.map((p: any) => (
-                    <div key={p.productId} className="flex justify-between items-center p-2 border border-zinc-850 hover:border-zinc-800 bg-[#16161c]/20 hover:bg-[#16161c]/40 rounded-xl transition-all">
+                    <div
+                      key={p.productId}
+                      className="flex justify-between items-center p-2 border border-zinc-850 hover:border-zinc-800 bg-[#16161c]/20 hover:bg-[#16161c]/40 rounded-xl transition-all"
+                    >
                       <div className="truncate max-w-[120px]">
-                        <span className="text-xs font-semibold text-white block truncate">{p.name}</span>
-                        <span className="text-[9px] text-zinc-500 font-mono uppercase">{p.sku}</span>
+                        <span className="text-xs font-semibold text-white block truncate">
+                          {p.name}
+                        </span>
+                        <span className="text-[9px] text-zinc-500 font-mono uppercase">
+                          {p.sku}
+                        </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs font-bold text-white block">{formatCurrency(p.revenue)}</span>
-                        <span className="text-[10px] text-zinc-500 font-bold block">{p.quantitySold} units</span>
+                        <span className="text-xs font-bold text-white block">
+                          {formatCurrency(p.revenue)}
+                        </span>
+                        <span className="text-[10px] text-zinc-500 font-bold block">
+                          {p.quantitySold} units
+                        </span>
                       </div>
                     </div>
                   ))
@@ -798,19 +940,32 @@ export const DashboardPage: React.FC = () => {
               </h4>
               <div className="space-y-2 max-h-56 overflow-y-auto">
                 {isLoadingAnalytics ? (
-                  [...Array(3)].map((_, i) => <div key={i} className="h-10 bg-zinc-900 rounded-lg animate-pulse" />)
+                  [...Array(3)].map((_, i) => (
+                    <div key={i} className="h-10 bg-zinc-900 rounded-lg animate-pulse" />
+                  ))
                 ) : !analytics?.lowSellingProducts || analytics.lowSellingProducts.length === 0 ? (
                   <div className="text-zinc-650 text-xs py-4 text-center">No data available</div>
                 ) : (
                   analytics.lowSellingProducts.map((p: any) => (
-                    <div key={p.productId} className="flex justify-between items-center p-2 border border-zinc-850 hover:border-zinc-800 bg-[#16161c]/20 hover:bg-[#16161c]/40 rounded-xl transition-all">
+                    <div
+                      key={p.productId}
+                      className="flex justify-between items-center p-2 border border-zinc-850 hover:border-zinc-800 bg-[#16161c]/20 hover:bg-[#16161c]/40 rounded-xl transition-all"
+                    >
                       <div className="truncate max-w-[120px]">
-                        <span className="text-xs font-semibold text-white block truncate">{p.name}</span>
-                        <span className="text-[9px] text-zinc-500 font-mono uppercase">{p.sku}</span>
+                        <span className="text-xs font-semibold text-white block truncate">
+                          {p.name}
+                        </span>
+                        <span className="text-[9px] text-zinc-500 font-mono uppercase">
+                          {p.sku}
+                        </span>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs font-bold text-white block">{formatCurrency(p.revenue)}</span>
-                        <span className="text-[10px] text-zinc-550 font-bold block">{p.quantitySold} units</span>
+                        <span className="text-xs font-bold text-white block">
+                          {formatCurrency(p.revenue)}
+                        </span>
+                        <span className="text-[10px] text-zinc-550 font-bold block">
+                          {p.quantitySold} units
+                        </span>
                       </div>
                     </div>
                   ))
@@ -824,7 +979,9 @@ export const DashboardPage: React.FC = () => {
         <div className="bg-[#0c0c0f] border border-zinc-800/80 rounded-2xl p-6 shadow-xl space-y-4">
           <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Top Spent Customers</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">
+                Top Spent Customers
+              </h3>
               <p className="text-xs text-zinc-500">Highest invoice accounts in selected period</p>
             </div>
             <Users className="h-4.5 w-4.5 text-zinc-500" />
@@ -844,10 +1001,18 @@ export const DashboardPage: React.FC = () => {
                 {isLoadingAnalytics ? (
                   [...Array(3)].map((_, idx) => (
                     <tr key={idx} className="animate-pulse">
-                      <td className="py-3"><div className="h-3 bg-zinc-800 rounded w-20"></div></td>
-                      <td className="py-3"><div className="h-3 bg-zinc-800 rounded w-16"></div></td>
-                      <td className="py-3 text-center"><div className="h-3 bg-zinc-800 rounded w-6 mx-auto"></div></td>
-                      <td className="py-3 text-right"><div className="h-3 bg-zinc-800 rounded w-14 ml-auto"></div></td>
+                      <td className="py-3">
+                        <div className="h-3 bg-zinc-800 rounded w-20"></div>
+                      </td>
+                      <td className="py-3">
+                        <div className="h-3 bg-zinc-800 rounded w-16"></div>
+                      </td>
+                      <td className="py-3 text-center">
+                        <div className="h-3 bg-zinc-800 rounded w-6 mx-auto"></div>
+                      </td>
+                      <td className="py-3 text-right">
+                        <div className="h-3 bg-zinc-800 rounded w-14 ml-auto"></div>
+                      </td>
                     </tr>
                   ))
                 ) : !analytics?.topCustomers || analytics.topCustomers.length === 0 ? (
@@ -862,7 +1027,9 @@ export const DashboardPage: React.FC = () => {
                       <td className="py-3 font-semibold text-white">{c.name}</td>
                       <td className="py-3 text-zinc-500">{c.company || 'Private Buyer'}</td>
                       <td className="py-3 text-center font-bold text-zinc-350">{c.ordersCount}</td>
-                      <td className="py-3 text-right font-bold text-white">{formatCurrency(c.totalSpent)}</td>
+                      <td className="py-3 text-right font-bold text-white">
+                        {formatCurrency(c.totalSpent)}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -876,7 +1043,9 @@ export const DashboardPage: React.FC = () => {
       <div className="bg-[#0c0c0f] border border-zinc-800/80 rounded-2xl p-6 shadow-xl space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">Recent Sales Journal</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-400">
+              Recent Sales Journal
+            </h3>
             <p className="text-xs text-zinc-500">Most recent order ledger transactions</p>
           </div>
           <Link
@@ -908,21 +1077,29 @@ export const DashboardPage: React.FC = () => {
                 </tr>
               ) : (
                 recentSales.map((sale: any) => {
-                  const itemsCount = sale.items?.reduce((acc: number, item: any) => acc + item.quantity, 0) || 0;
+                  const itemsCount =
+                    sale.items?.reduce((acc: number, item: any) => acc + item.quantity, 0) || 0;
                   const firstItemName = sale.items?.[0]?.product?.name || '';
-                  const itemSummaryText = sale.items?.length > 1 
-                    ? `${firstItemName} and ${sale.items.length - 1} other item(s)`
-                    : firstItemName || 'No items';
+                  const itemSummaryText =
+                    sale.items?.length > 1
+                      ? `${firstItemName} and ${sale.items.length - 1} other item(s)`
+                      : firstItemName || 'No items';
 
                   return (
                     <tr key={sale.id} className="hover:bg-zinc-800/10 transition-colors">
-                      <td className="py-3.5 text-zinc-550 font-medium">{formatDate(sale.saleDate)}</td>
+                      <td className="py-3.5 text-zinc-550 font-medium">
+                        {formatDate(sale.saleDate)}
+                      </td>
                       <td className="py-3.5 font-semibold text-white">{sale.customer?.name}</td>
                       <td className="py-3.5 text-zinc-400">
                         {itemSummaryText}{' '}
-                        <span className="text-[10px] text-zinc-550 ml-1">({itemsCount} unit(s))</span>
+                        <span className="text-[10px] text-zinc-550 ml-1">
+                          ({itemsCount} unit(s))
+                        </span>
                       </td>
-                      <td className="py-3.5 text-right font-bold text-white">{formatCurrency(sale.totalAmount)}</td>
+                      <td className="py-3.5 text-right font-bold text-white">
+                        {formatCurrency(sale.totalAmount)}
+                      </td>
                       <td className="py-3.5 text-right">
                         <Link
                           to={`/sales/${sale.id}/edit`}

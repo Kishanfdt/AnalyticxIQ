@@ -20,9 +20,7 @@ export class ExportController {
     }
 
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-      ];
+      where.OR = [{ name: { contains: search, mode: 'insensitive' } }];
     }
 
     return { where, categoryId, region, status, search };
@@ -40,10 +38,13 @@ export class ExportController {
         throw new AppError('Unauthorized access.', 401, ERROR_CODES.UNAUTHORIZED);
       }
       const businessId = req.user.businessId;
-      const { where, search, categoryId, region, status } = ExportController.buildBaseFilters(businessId, req.query);
+      const { search, categoryId, region, status } = ExportController.buildBaseFilters(
+        businessId,
+        req.query,
+      );
 
       let data: any[] = [];
-      let workbook = XLSX.utils.book_new();
+      const workbook = XLSX.utils.book_new();
 
       // 1. Fetch data based on resource type
       if (resource === 'products') {
@@ -76,7 +77,6 @@ export class ExportController {
 
         const ws = XLSX.utils.json_to_sheet(data);
         XLSX.utils.book_append_sheet(workbook, ws, 'Products');
-
       } else if (resource === 'customers') {
         const custWhere: any = { businessId };
         if (region) custWhere.region = region;
@@ -107,7 +107,6 @@ export class ExportController {
 
         const ws = XLSX.utils.json_to_sheet(data);
         XLSX.utils.book_append_sheet(workbook, ws, 'Customers');
-
       } else if (resource === 'sales') {
         const saleWhere: any = { businessId };
         if (status) saleWhere.status = status;
@@ -143,7 +142,6 @@ export class ExportController {
 
         const ws = XLSX.utils.json_to_sheet(data);
         XLSX.utils.book_append_sheet(workbook, ws, 'Sales Ledger');
-
       } else if (resource === 'analytics') {
         // Query Advanced Analytics
         const filters = {
@@ -197,16 +195,23 @@ export class ExportController {
         const csv = XLSX.utils.sheet_to_csv(ws);
 
         res.setHeader('Content-Type', 'text/csv');
-        res.setHeader('Content-Disposition', `attachment; filename=${resource}_export_${Date.now()}.csv`);
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename=${resource}_export_${Date.now()}.csv`,
+        );
         return res.status(200).send(csv);
-
       } else if (format === 'excel') {
         const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
 
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', `attachment; filename=${resource}_export_${Date.now()}.xlsx`);
+        res.setHeader(
+          'Content-Type',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        );
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename=${resource}_export_${Date.now()}.xlsx`,
+        );
         return res.status(200).send(buffer);
-
       } else if (format === 'pdf') {
         // Output print-friendly HTML view. Browser handles saving as PDF.
         const title = `${resource.toUpperCase()} REPORT`;
@@ -229,7 +234,7 @@ export class ExportController {
                   <tr>
                     ${headers.map((h) => `<td>${row[h]}</td>`).join('')}
                   </tr>
-                `
+                `,
                   )
                   .join('')}
               </tbody>
@@ -328,7 +333,11 @@ export class ExportController {
         res.setHeader('Content-Type', 'text/html');
         return res.status(200).send(html);
       } else {
-        throw new AppError('Invalid format parameter. Supported: csv, excel, pdf.', 400, ERROR_CODES.BAD_REQUEST);
+        throw new AppError(
+          'Invalid format parameter. Supported: csv, excel, pdf.',
+          400,
+          ERROR_CODES.BAD_REQUEST,
+        );
       }
     } catch (error) {
       next(error);

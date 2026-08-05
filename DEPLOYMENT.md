@@ -23,6 +23,7 @@ We recommend using **Neon Serverless PostgreSQL** for production.
 ## 2. Backend Deployment (Railway or Render)
 
 ### Railway Deployment (Recommended)
+
 1. **Connect Repository**: Link your GitHub repository in your Railway project workspace.
 2. **Build Configuration**:
    - **Build Command**: `npm run build`

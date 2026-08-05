@@ -2,13 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AuthService } from '../services/auth.service.js';
 import { prisma } from '../prisma/index.js';
 import { AppError } from '../utils/errors.js';
-import bcrypt from 'bcryptjs';
 
 // Mock bcrypt and prisma client singleton
 vi.mock('../prisma/index.js', () => {
   const mockTx = {
     business: {
-      create: vi.fn().mockResolvedValue({ id: 'business-123', name: 'Acme Corp', slug: 'acme-corp' }),
+      create: vi
+        .fn()
+        .mockResolvedValue({ id: 'business-123', name: 'Acme Corp', slug: 'acme-corp' }),
     },
     user: {
       create: vi.fn().mockResolvedValue({

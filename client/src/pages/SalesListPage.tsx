@@ -73,9 +73,7 @@ export const SalesListPage: React.FC = () => {
       setDeleteError(null);
     },
     onError: (err: any) => {
-      setDeleteError(
-        err.response?.data?.message || 'Failed to delete the sale transaction.',
-      );
+      setDeleteError(err.response?.data?.message || 'Failed to delete the sale transaction.');
     },
   });
 

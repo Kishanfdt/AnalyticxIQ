@@ -10,9 +10,13 @@ const RegisterPage = lazy(() => import('./pages').then((m) => ({ default: m.Regi
 const ProductListPage = lazy(() => import('./pages').then((m) => ({ default: m.ProductListPage })));
 const AddProductPage = lazy(() => import('./pages').then((m) => ({ default: m.AddProductPage })));
 const EditProductPage = lazy(() => import('./pages').then((m) => ({ default: m.EditProductPage })));
-const CustomerListPage = lazy(() => import('./pages').then((m) => ({ default: m.CustomerListPage })));
+const CustomerListPage = lazy(() =>
+  import('./pages').then((m) => ({ default: m.CustomerListPage })),
+);
 const AddCustomerPage = lazy(() => import('./pages').then((m) => ({ default: m.AddCustomerPage })));
-const EditCustomerPage = lazy(() => import('./pages').then((m) => ({ default: m.EditCustomerPage })));
+const EditCustomerPage = lazy(() =>
+  import('./pages').then((m) => ({ default: m.EditCustomerPage })),
+);
 const SalesListPage = lazy(() => import('./pages').then((m) => ({ default: m.SalesListPage })));
 const CreateSalePage = lazy(() => import('./pages').then((m) => ({ default: m.CreateSalePage })));
 const EditSalePage = lazy(() => import('./pages').then((m) => ({ default: m.EditSalePage })));

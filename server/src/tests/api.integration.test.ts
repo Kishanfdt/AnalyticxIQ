@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { app } from '../app.js';
 
@@ -6,7 +6,7 @@ describe('Express API Integration Tests', () => {
   describe('GET /health', () => {
     it('should respond with health metrics and status UP', async () => {
       const res = await request(app).get('/health');
-      
+
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.status).toBe('UP');
@@ -24,9 +24,7 @@ describe('Express API Integration Tests', () => {
 
   describe('POST /api/v1/auth/login', () => {
     it('should return 400 Bad Request if fields are missing', async () => {
-      const res = await request(app)
-        .post('/api/v1/auth/login')
-        .send({ email: '' }); // missing password
+      const res = await request(app).post('/api/v1/auth/login').send({ email: '' }); // missing password
 
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
