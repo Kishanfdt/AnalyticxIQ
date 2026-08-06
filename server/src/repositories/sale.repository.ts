@@ -1,5 +1,7 @@
 import { prisma } from '../prisma/index.js';
 import { Prisma } from '@prisma/client';
+import { AppError } from '../utils/errors.js';
+import { ERROR_CODES } from '@analyticiq/shared';
 
 export class SaleRepository {
   /**
@@ -13,6 +15,34 @@ export class SaleRepository {
     totalAmount: number,
   ) {
     return prisma.$transaction(async (tx) => {
+      // Deduct product stock and validate
+      for (const item of items) {
+        const product = await tx.product.findUnique({
+          where: { id: item.productId },
+        });
+
+        if (!product) {
+          throw new AppError(`Product with ID "${item.productId}" not found.`, 404, ERROR_CODES.NOT_FOUND);
+        }
+
+        if (product.stock < item.quantity) {
+          throw new AppError(
+            `Insufficient stock for product "${product.name}". Available: ${product.stock}, requested: ${item.quantity}.`,
+            400,
+            ERROR_CODES.BAD_REQUEST,
+          );
+        }
+
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      }
+
       return tx.sale.create({
         data: {
           businessId,
@@ -130,12 +160,62 @@ export class SaleRepository {
     totalAmount: number,
   ) {
     return prisma.$transaction(async (tx) => {
-      // 1. Delete all existing sale items for this sale
+      // 1. Retrieve the existing sale items to revert their quantities back to stock
+      const existingSale = await tx.sale.findUnique({
+        where: { id },
+        include: { items: true },
+      });
+
+      if (!existingSale) {
+        throw new AppError('Sale not found.', 404, ERROR_CODES.NOT_FOUND);
+      }
+
+      // Revert the stock of existing sale items
+      for (const oldItem of existingSale.items) {
+        await tx.product.update({
+          where: { id: oldItem.productId },
+          data: {
+            stock: {
+              increment: oldItem.quantity,
+            },
+          },
+        });
+      }
+
+      // 2. Validate new quantities against the restored stock and deduct stock
+      for (const item of items) {
+        const product = await tx.product.findUnique({
+          where: { id: item.productId },
+        });
+
+        if (!product) {
+          throw new AppError(`Product with ID "${item.productId}" not found.`, 404, ERROR_CODES.NOT_FOUND);
+        }
+
+        if (product.stock < item.quantity) {
+          throw new AppError(
+            `Insufficient stock for product "${product.name}". Available: ${product.stock}, requested: ${item.quantity}.`,
+            400,
+            ERROR_CODES.BAD_REQUEST,
+          );
+        }
+
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      }
+
+      // 3. Delete all existing sale items for this sale
       await tx.saleItem.deleteMany({
         where: { saleId: id },
       });
 
-      // 2. Update the sale and insert new items
+      // 4. Update the sale and insert new items
       return tx.sale.update({
         where: { id, businessId },
         data: {
@@ -167,8 +247,32 @@ export class SaleRepository {
    * Deletes a sale. (Child sale items cascade delete)
    */
   public static async delete(id: string, businessId: string) {
-    return prisma.sale.delete({
-      where: { id, businessId },
+    return prisma.$transaction(async (tx) => {
+      const existingSale = await tx.sale.findFirst({
+        where: { id, businessId },
+        include: { items: true },
+      });
+
+      if (!existingSale) {
+        throw new AppError('Sale not found.', 404, ERROR_CODES.NOT_FOUND);
+      }
+
+      // Restore stock for all items
+      for (const item of existingSale.items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            stock: {
+              increment: item.quantity,
+            },
+          },
+        });
+      }
+
+      // Delete the sale record (cascade delete will handle SaleItem)
+      return tx.sale.delete({
+        where: { id, businessId },
+      });
     });
   }
 }

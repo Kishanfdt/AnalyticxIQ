@@ -213,6 +213,7 @@ export class ImportService {
     const productMap = new Map(dbProducts.map((p) => [p.sku.toLowerCase(), p]));
     const customerMapByEmail = new Map(dbCustomers.map((c) => [(c.email || '').toLowerCase(), c]));
     const customerMapByName = new Map(dbCustomers.map((c) => [c.name.toLowerCase(), c]));
+    const productStockMap = new Map(dbProducts.map((p) => [p.id, p.stock]));
 
     // Group items by unique sale key: customerEmail + saleDate + salespersonId + status
     const groupedSales = new Map<string, any>();
@@ -261,6 +262,17 @@ export class ImportService {
         invalidRows.push({ rowNumber, reason: 'Discount must be between 0 and 100' });
         continue;
       }
+
+      // 4. Validate stock
+      const currentStock = productStockMap.get(product.id) ?? 0;
+      if (currentStock < quantity) {
+        invalidRows.push({
+          rowNumber,
+          reason: `Insufficient stock for product SKU "${productSku}". Available: ${currentStock}, requested: ${quantity}`,
+        });
+        continue;
+      }
+      productStockMap.set(product.id, currentStock - quantity);
 
       const saleDate = saleDateStr ? new Date(saleDateStr) : new Date();
       if (isNaN(saleDate.getTime())) {
@@ -316,6 +328,18 @@ export class ImportService {
             discount: item.discount,
           };
         });
+
+        // Decrement product stock in DB
+        for (const item of lineItems) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: {
+                decrement: item.quantity,
+              },
+            },
+          });
+        }
 
         await tx.sale.create({
           data: {
