@@ -15,6 +15,7 @@ This application is built using a decoupled monorepo architecture with logical t
 - **BI Analytics Engine**: High-performance dashboard aggregations (Gross Revenue, Net Revenue, Profit margins, Monthly trends, Region/Category sales) using raw SQL queries with indexes.
 - **Stream-Based CSV Ingestion**: High-throughput CSV file parsing using PapaParse and Multer, with row-level validation and atomic database transaction safety.
 - **Data Export Engine**: Instant exports of Sales, Customers, and Products to CSV or Excel formats.
+- **Automatic Stock Control**: Transaction-safe catalog inventory updates. Sales transactions automatically decrement available product stock. Insufficient stock rejects the sale, and modifications/deletions revert and adjust stock levels accordingly.
 
 ---
 
@@ -151,7 +152,14 @@ Ensure PostgreSQL is running locally on port 5432.
 Apply schema migrations and generate the Prisma client:
 
 ```bash
+# Run migrations in development (interactive)
 npm run prisma:migrate --workspace=server
+
+# Or deploy existing migrations directly to a new/production database (non-interactive)
+npx prisma migrate deploy --schema=server/prisma/schema.prisma
+
+# Or reset development database and apply all migrations from scratch
+npx prisma migrate reset --force --schema=server/prisma/schema.prisma
 ```
 
 ### 3. Run Applications
