@@ -1,0 +1,7 @@
+﻿{
+  "framework": "vite",
+  "buildCommand": "npm ci --legacy-peer-deps && npm run build:shared && npm run build:client",
+  "outputDirectory": "client/dist",
+  "installCommand": "echo skip",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
