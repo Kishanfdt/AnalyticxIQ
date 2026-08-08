@@ -1,0 +1,43 @@
+﻿# render.yaml — Render Infrastructure as Code
+# Docs: https://render.com/docs/infrastructure-as-code
+#
+# How to use:
+#   1. Push this file to your GitHub repo.
+#   2. In Render dashboard → New → Blueprint → connect your repo.
+#   3. Render will auto-detect this file and create the service.
+#   4. Set the secret env vars (DATABASE_URL, JWT_SECRET, CORS_ORIGIN)
+#      manually in the Render dashboard after first deploy.
+
+services:
+  - type: web
+    name: analyticxiq-backend
+    runtime: node
+    region: singapore          # closest to your Neon ap-southeast-1 cluster
+    plan: free
+
+    # ── Build ────────────────────────────────────────────────────────────────
+    # Render runs commands from the repo root.
+    buildCommand: npm ci --legacy-peer-deps && npm run build:shared && npm run build:server
+
+    # ── Start ────────────────────────────────────────────────────────────────
+    startCommand: node server/dist/server.js
+
+    # ── Health Check ─────────────────────────────────────────────────────────
+    healthCheckPath: /health
+
+    # ── Environment Variables ─────────────────────────────────────────────────
+    # Non-secret values are listed here.
+    # SECRET values (DATABASE_URL, JWT_SECRET, CORS_ORIGIN) must be set
+    # manually in the Render dashboard → Environment tab.
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      # ⬇ Set these in the Render Dashboard → Environment (do NOT commit real values)
+      - key: DATABASE_URL
+        sync: false            # prompts for value in dashboard
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false            # e.g. https://your-app.vercel.app

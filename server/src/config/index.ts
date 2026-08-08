@@ -8,6 +8,8 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   DATABASE_URL: z.string().url().optional(),
   JWT_SECRET: z.string().default('super_secret_fallback_key_for_development'),
+  // Comma-separated list of allowed frontend origins (e.g. https://your-app.vercel.app)
+  CORS_ORIGIN: z.string().optional(),
 });
 
 const parseResult = envSchema.safeParse(process.env);

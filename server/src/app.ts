@@ -37,7 +37,17 @@ app.use('/api', limiter);
 // Request Logging
 app.use(requestLogger);
 
-app.use(cors());
+app.use(
+  cors({
+    // In production, only allow requests from the configured frontend origin(s).
+    // Set CORS_ORIGIN to your Vercel URL in the Render environment variables.
+    // Multiple origins can be comma-separated: "https://a.vercel.app,https://b.vercel.app"
+    origin: config.CORS_ORIGIN
+      ? config.CORS_ORIGIN.split(',').map((o) => o.trim())
+      : ['http://localhost:3000', 'http://localhost:5173'],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
 // Health check endpoint
