@@ -16,7 +16,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npx tsc",
     "watch": "tsc --watch",
     "clean": "rimraf dist"
   },

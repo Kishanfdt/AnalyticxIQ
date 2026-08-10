@@ -1,5 +1,7 @@
 FROM node:20-alpine AS builder
 
+RUN apk add --no-cache openssl ca-certificates
+
 WORKDIR /app
 
 # Copy root monorepo files
@@ -19,6 +21,8 @@ RUN npm run build:server
 
 # Production Runner Stage
 FROM node:20-alpine
+
+RUN apk add --no-cache openssl ca-certificates
 
 WORKDIR /app
 
