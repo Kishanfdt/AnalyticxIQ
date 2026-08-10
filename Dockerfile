@@ -13,7 +13,7 @@ COPY shared/ ./shared/
 COPY server/ ./server/
 
 # Install all dependencies and build libraries/server
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 RUN npm run build:shared
 RUN npm run build:server
 
