@@ -39,12 +39,23 @@ app.use(requestLogger);
 
 app.use(
   cors({
-    // In production, only allow requests from the configured frontend origin(s).
-    // Set CORS_ORIGIN to your Vercel URL in the Render environment variables.
-    // Multiple origins can be comma-separated: "https://a.vercel.app,https://b.vercel.app"
-    origin: config.CORS_ORIGIN
-      ? config.CORS_ORIGIN.split(',').map((o) => o.trim())
-      : ['http://localhost:3000', 'http://localhost:5173'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, postman)
+      if (!origin) return callback(null, true);
+      if (!config.CORS_ORIGIN || config.CORS_ORIGIN === '*') {
+        return callback(null, true);
+      }
+      const allowedOrigins = config.CORS_ORIGIN.split(',').map((o) => o.trim().replace(/\/$/, ''));
+      const normalizedOrigin = origin.replace(/\/$/, '');
+      if (
+        allowedOrigins.includes(normalizedOrigin) ||
+        normalizedOrigin.endsWith('.vercel.app') ||
+        normalizedOrigin.includes('localhost')
+      ) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   }),
 );
