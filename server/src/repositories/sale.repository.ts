@@ -15,32 +15,25 @@ export class SaleRepository {
     totalAmount: number,
   ) {
     return prisma.$transaction(async (tx) => {
-      // Deduct product stock and validate
+      // Deduct product stock atomically and validate
       for (const item of items) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-        });
+        const affectedRows = (await tx.$executeRaw`UPDATE "Product" SET stock = stock - ${item.quantity} WHERE id = ${item.productId} AND stock >= ${item.quantity}`) as number;
 
-        if (!product) {
-          throw new AppError(`Product with ID "${item.productId}" not found.`, 404, ERROR_CODES.NOT_FOUND);
-        }
+        if (affectedRows === 0) {
+          const product = await tx.product.findUnique({
+            where: { id: item.productId },
+          });
 
-        if (product.stock < item.quantity) {
+          if (!product) {
+            throw new AppError(`Product with ID "${item.productId}" not found.`, 404, ERROR_CODES.NOT_FOUND);
+          }
+
           throw new AppError(
             `Insufficient stock for product "${product.name}". Available: ${product.stock}, requested: ${item.quantity}.`,
             400,
             ERROR_CODES.BAD_REQUEST,
           );
         }
-
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: item.quantity,
-            },
-          },
-        });
       }
 
       return tx.sale.create({
@@ -182,32 +175,25 @@ export class SaleRepository {
         });
       }
 
-      // 2. Validate new quantities against the restored stock and deduct stock
+      // 2. Validate new quantities against the restored stock and deduct stock atomically
       for (const item of items) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-        });
+        const affectedRows = (await tx.$executeRaw`UPDATE "Product" SET stock = stock - ${item.quantity} WHERE id = ${item.productId} AND stock >= ${item.quantity}`) as number;
 
-        if (!product) {
-          throw new AppError(`Product with ID "${item.productId}" not found.`, 404, ERROR_CODES.NOT_FOUND);
-        }
+        if (affectedRows === 0) {
+          const product = await tx.product.findUnique({
+            where: { id: item.productId },
+          });
 
-        if (product.stock < item.quantity) {
+          if (!product) {
+            throw new AppError(`Product with ID "${item.productId}" not found.`, 404, ERROR_CODES.NOT_FOUND);
+          }
+
           throw new AppError(
             `Insufficient stock for product "${product.name}". Available: ${product.stock}, requested: ${item.quantity}.`,
             400,
             ERROR_CODES.BAD_REQUEST,
           );
         }
-
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: {
-              decrement: item.quantity,
-            },
-          },
-        });
       }
 
       // 3. Delete all existing sale items for this sale

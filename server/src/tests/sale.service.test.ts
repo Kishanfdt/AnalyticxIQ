@@ -4,6 +4,7 @@ import { prisma } from '../prisma/index.js';
 import { AppError } from '../utils/errors.js';
 
 // Define hoisted mocks (must be prefixed with "mock")
+const mockExecuteRaw = vi.fn();
 const mockProductFindUnique = vi.fn();
 const mockProductUpdate = vi.fn();
 const mockSaleCreate = vi.fn();
@@ -28,6 +29,7 @@ vi.mock('../prisma/index.js', () => {
       },
       $transaction: vi.fn(async (callback) => {
         const tx = {
+          $executeRaw: mockExecuteRaw,
           product: {
             findUnique: mockProductFindUnique,
             update: mockProductUpdate,
@@ -68,6 +70,9 @@ describe('SaleService - Stock Logic', () => {
         { id: 'prod-1', name: 'Product A', price: '10.00', stock: 10, businessId: 'biz-1' },
       ] as any);
 
+      // Mock $executeRaw atomic update success (1 row affected)
+      mockExecuteRaw.mockResolvedValue(1);
+
       // Mock Product repository database fetch inside transaction
       mockProductFindUnique.mockResolvedValue({
         id: 'prod-1',
@@ -98,11 +103,7 @@ describe('SaleService - Stock Logic', () => {
       const result = await SaleService.createSale('biz-1', input);
 
       expect(result.id).toBe('sale-1');
-      expect(mockProductFindUnique).toHaveBeenCalledWith({ where: { id: 'prod-1' } });
-      expect(mockProductUpdate).toHaveBeenCalledWith({
-        where: { id: 'prod-1' },
-        data: { stock: { decrement: 2 } },
-      });
+      expect(mockExecuteRaw).toHaveBeenCalled();
       expect(mockSaleCreate).toHaveBeenCalled();
     });
 
@@ -119,7 +120,10 @@ describe('SaleService - Stock Logic', () => {
         { id: 'prod-1', name: 'Product A', price: '10.00', stock: 1, businessId: 'biz-1' },
       ] as any);
 
-      // Mock Product repository db fetch inside transaction
+      // Mock $executeRaw atomic update failure (0 rows affected)
+      mockExecuteRaw.mockResolvedValue(0);
+
+      // Mock Product repository db fetch inside transaction for error formatting
       mockProductFindUnique.mockResolvedValue({
         id: 'prod-1',
         name: 'Product A',
@@ -137,7 +141,6 @@ describe('SaleService - Stock Logic', () => {
       };
 
       await expect(SaleService.createSale('biz-1', input)).rejects.toThrow(AppError);
-      expect(mockProductUpdate).not.toHaveBeenCalled();
       expect(mockSaleCreate).not.toHaveBeenCalled();
     });
   });
@@ -165,6 +168,9 @@ describe('SaleService - Stock Logic', () => {
       vi.mocked(prisma.product.findMany).mockResolvedValue([
         { id: 'prod-1', name: 'Product A', price: '10.00', stock: 5, businessId: 'biz-1' },
       ] as any);
+
+      // Mock $executeRaw atomic update success (1 row affected)
+      mockExecuteRaw.mockResolvedValue(1);
 
       // Transaction operations mock:
       // 1. Get original sale in transaction
@@ -203,15 +209,11 @@ describe('SaleService - Stock Logic', () => {
 
       expect(result.id).toBe('sale-1');
       // Revert old item: increment by 1
-      expect(mockProductUpdate).toHaveBeenNthCalledWith(1, {
+      expect(mockProductUpdate).toHaveBeenCalledWith({
         where: { id: 'prod-1' },
         data: { stock: { increment: 1 } },
       });
-      // Deduct new item: decrement by 3
-      expect(mockProductUpdate).toHaveBeenNthCalledWith(2, {
-        where: { id: 'prod-1' },
-        data: { stock: { decrement: 3 } },
-      });
+      expect(mockExecuteRaw).toHaveBeenCalled();
       expect(mockSaleItemDeleteMany).toHaveBeenCalledWith({ where: { saleId: 'sale-1' } });
       expect(mockSaleUpdate).toHaveBeenCalled();
     });

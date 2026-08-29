@@ -78,7 +78,10 @@ export class CustomerRepository {
    */
   public static async findByEmail(email: string, businessId: string) {
     return prisma.customer.findFirst({
-      where: { email, businessId },
+      where: {
+        email: { equals: email, mode: 'insensitive' },
+        businessId,
+      },
     });
   }
 

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "xlsx_install_note": "Installed via: npm install https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
   "scripts": {
     "dev": "vite",
     "build": "npm run build --workspace=@analyticiq/shared && tsc && vite build",
@@ -13,9 +14,13 @@
     "@analyticiq/shared": "*",
     "@hookform/resolvers": "^3.3.4",
     "@tanstack/react-query": "^5.24.1",
+    "@types/lodash": "^4.17.25",
     "axios": "^1.6.7",
     "clsx": "^2.1.0",
     "date-fns": "^3.3.1",
+    "lodash": "^4.18.1",
+    "lodash-es": "^4.18.1",
+    "lodash.first": "^3.0.0",
     "lucide-react": "^0.331.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -23,6 +28,7 @@
     "react-router-dom": "^6.22.1",
     "recharts": "^2.12.1",
     "tailwind-merge": "^2.2.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^3.22.4"
   },
   "devDependencies": {

@@ -15,6 +15,8 @@ import { requestLogger } from './middleware/logging.middleware.js';
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 // Security Headers
 app.use(helmet());
 
@@ -42,18 +44,22 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (e.g. mobile apps, curl, postman)
       if (!origin) return callback(null, true);
-      if (!config.CORS_ORIGIN || config.CORS_ORIGIN === '*') {
-        return callback(null, true);
-      }
-      const allowedOrigins = config.CORS_ORIGIN.split(',').map((o) => o.trim().replace(/\/$/, ''));
+      const allowedOrigins = config.CORS_ORIGIN
+        ? config.CORS_ORIGIN.split(',').map((o) => o.trim().replace(/\/$/, ''))
+        : [];
       const normalizedOrigin = origin.replace(/\/$/, '');
-      if (
-        allowedOrigins.includes(normalizedOrigin) ||
-        normalizedOrigin.endsWith('.vercel.app') ||
-        normalizedOrigin.includes('localhost')
-      ) {
+
+      if (allowedOrigins.includes(normalizedOrigin)) {
         return callback(null, true);
       }
+
+      if (config.NODE_ENV !== 'production') {
+        const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalizedOrigin);
+        if (isLocalhost) {
+          return callback(null, true);
+        }
+      }
+
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,

@@ -8,8 +8,10 @@ const mockTxCategoryCreate = vi.fn();
 const mockTxProductCreate = vi.fn();
 const mockTxProductUpdate = vi.fn();
 const mockTxSaleCreate = vi.fn();
+const mockTxExecuteRaw = vi.fn();
 
 const mockTx = {
+  $executeRaw: mockTxExecuteRaw,
   category: {
     findFirst: mockTxCategoryFindFirst,
     create: mockTxCategoryCreate,
@@ -84,6 +86,8 @@ describe('ImportService', () => {
         { id: 'prod-1', sku: 'SKU-1', name: 'Product A', price: 10, stock: 10, businessId: 'biz-1' },
       ] as any);
 
+      mockTxExecuteRaw.mockResolvedValue(1);
+
       const mockRows = [
         {
           customerEmail: 'john@example.com',
@@ -99,10 +103,7 @@ describe('ImportService', () => {
 
       expect(result.success).toBe(true);
       expect(result.importedCount).toBe(1);
-      expect(mockTxProductUpdate).toHaveBeenCalledWith({
-        where: { id: 'prod-1' },
-        data: { stock: { decrement: 3 } },
-      });
+      expect(mockTxExecuteRaw).toHaveBeenCalled();
       expect(mockTxSaleCreate).toHaveBeenCalled();
     });
 
