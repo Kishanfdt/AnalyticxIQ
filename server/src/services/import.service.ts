@@ -329,16 +329,12 @@ export class ImportService {
           };
         });
 
-        // Decrement product stock in DB
+        // Decrement product stock in DB atomically
         for (const item of lineItems) {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: {
-              stock: {
-                decrement: item.quantity,
-              },
-            },
-          });
+          const affectedRows = (await tx.$executeRaw`UPDATE "Product" SET stock = stock - ${item.quantity} WHERE id = ${item.productId} AND stock >= ${item.quantity}`) as number;
+          if (affectedRows === 0) {
+            throw new Error(`Insufficient stock for product ID "${item.productId}"`);
+          }
         }
 
         await tx.sale.create({
