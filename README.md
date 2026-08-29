@@ -2,49 +2,52 @@
 
 **AnalyticxIQ** is a production-grade, multi-tenant SaaS Sales Analytics Platform designed to help businesses manage products, customers, and transactions, and visualize business performance through interactive BI dashboards.
 
-This application is built using a decoupled monorepo architecture with logical tenant isolation, joint schema validation, and database transaction safety.
+This application is built using a decoupled monorepo architecture with logical tenant isolation, joint schema validation, atomic transaction safety, and production security hardening.
 
 ---
 
 ## 🚀 Key Features
 
 - **Logical Tenant Isolation**: Multi-tenant database model where all data queries are logically isolated at the service/repository layer via a unified `tenantId` (linked to `businessId`).
-- **Decoupled Architecture**: A modern React SPA communicating with an Express REST API backend, using Vite dev server proxies.
-- **Dual-Token Authentication**: Secure JWT structure using short-lived memory access tokens and long-lived HTTP-only cookies for refresh tokens.
-- **Joint Schema Validation**: Shared Zod constraints package used by both the React client forms and Express endpoint validation middleware.
-- **BI Analytics Engine**: High-performance dashboard aggregations (Gross Revenue, Net Revenue, Profit margins, Monthly trends, Region/Category sales) using raw SQL queries with indexes.
-- **Stream-Based CSV Ingestion**: High-throughput CSV file parsing using PapaParse and Multer, with row-level validation and atomic database transaction safety.
-- **Data Export Engine**: Instant exports of Sales, Customers, and Products to CSV or Excel formats.
-- **Automatic Stock Control**: Transaction-safe catalog inventory updates. Sales transactions automatically decrement available product stock. Insufficient stock rejects the sale, and modifications/deletions revert and adjust stock levels accordingly.
+- **Decoupled Architecture**: A modern React SPA communicating with an Express REST API backend, with Vercel frontend rewrite proxies and Render backend deployment.
+- **Dual-Token Authentication & RBAC**: Secure JWT authentication with strict Role-Based Access Control (`requireRole('OWNER', 'ADMIN')`) protecting sensitive mutation and deletion routes.
+- **Atomic Concurrency Stock Control**: Database-level atomic stock decrements (`UPDATE "Product" SET stock = stock - qty WHERE id = ? AND stock >= qty`) ensuring race-condition prevention and zero overselling under high concurrent traffic.
+- **Security & Injection Protection**:
+  - **Export Sanitization**: HTML entity escaping on PDF exports to prevent XSS; formula prefix sanitization (`'`, `=`, `+`, `-`, `@`) on CSV/XLSX exports to neutralize formula injection attacks.
+  - **Upload Protection**: Strict 5MB file upload limits and MIME/extension type validation (`.csv`, `.xlsx`, `.xls`).
+  - **Fail-Fast Secret Hardening**: Environment validation requiring minimum 32-character `JWT_SECRET` keys in production.
+  - **SheetJS Security Patch**: Dependency pinned to official patched SheetJS CDN builds.
+- **Joint Schema Validation**: Shared Zod constraints package used by both React client forms and Express endpoint validation middleware.
+- **BI Analytics Engine**: High-performance dashboard aggregations (Gross Revenue, Net Revenue, Profit margins, Monthly trends, Region/Category sales) using optimized SQL queries with indexed database columns.
+- **Case-Insensitive Uniqueness**: Case-insensitive checks for product SKU, customer Email, and category lookups to prevent duplicate entities.
+- **Global Auth Interceptors**: Automatic 401 response handling on the React client with global session expiration management.
+- **Data Ingestion & Export Engine**: High-throughput CSV/XLSX file parsing via PapaParse/Multer and instant multi-format data exports.
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-
 - **React (v18)** & **TypeScript**: Strict-type user interface.
-- **Vite**: Frontend bundler.
-- **Tailwind CSS**: Modern styling.
+- **Vite**: Modern frontend bundler and dev server.
+- **Tailwind CSS**: Utility-first responsive design.
 - **React Router Dom (v6)**: Declarative client routing.
-- **TanStack Query (React Query v5)**: Query caching and network state management.
-- **React Hook Form & Zod**: Form validation.
-- **Recharts**: Interactive responsive data charting.
-- **Axios**: Network client.
+- **TanStack Query (React Query v5)**: Network state management and caching.
+- **React Hook Form & Zod**: Schema-driven form validation.
+- **Recharts**: Interactive BI dashboard data visualizations.
+- **Axios**: Network client with global error interceptors.
 
 ### Backend
-
 - **Node.js** & **Express**: Scalable REST API server.
-- **TypeScript**: Type-safety throughout the backend.
-- **Prisma ORM**: Modern database access layer.
-- **PostgreSQL**: relational transaction storage.
-- **BcryptJS**: Password hashing.
-- **Helmet & Express Rate Limit**: Production security hardening.
+- **TypeScript**: Type-safety across the entire server layer.
+- **Prisma ORM**: Modern database mapping and raw SQL query execution.
+- **PostgreSQL / Neon DB**: Relational transaction storage with SSL support.
+- **BcryptJS**: Salted password hashing.
+- **Helmet & Express Rate Limit**: Hardened HTTP security headers and rate limiting with `trust proxy` support.
 
-### Shared Workspace
-
-- **Zod Schemas**: Reusable validation rules for products, sales, customers, and authentication.
-- **Constants**: System-wide pagination limits and error code constants.
+### Shared Workspace & CI/CD
+- **Zod Schemas**: Shared validation models for products, sales, customers, and authentication.
+- **GitHub Actions**: Automated CI matrix executing PostgreSQL service container, Prisma migrations, multi-package builds, Vitest test suites, and ESLint checks.
 
 ---
 
@@ -52,11 +55,11 @@ This application is built using a decoupled monorepo architecture with logical t
 
 ```mermaid
 graph TD
-  subgraph Frontend [React SPA Client - Port 3000]
+  subgraph Frontend [React SPA Client - Vercel / Port 3000]
     UI[React Views & UI Components]
     R[React Router]
     TQ[TanStack Query]
-    RHF[React Hook Form]
+    Axios[Axios Client + 401 Interceptor]
   end
 
   subgraph Shared [Shared Library Workspace]
@@ -64,29 +67,29 @@ graph TD
     C[Error & Status Constants]
   end
 
-  subgraph Backend [Express API Server - Port 5000]
+  subgraph Backend [Express API Server - Render / Port 5000]
     App[Express App]
-    MW[Helmet / Rate Limit / Auth Middleware]
+    MW[Helmet / Rate Limit / RBAC Middleware]
     Val[Request Validators]
     Ctrl[Route Controllers]
-    Repo[Repository Queries]
+    Repo[Atomic Repositories]
   end
 
-  subgraph Database [Storage Layer]
+  subgraph Database [Storage Layer - Neon Cloud DB]
     P[Prisma Client]
-    DB[(PostgreSQL)]
+    DB[(PostgreSQL Database)]
   end
 
   UI --> R
   UI --> TQ
-  TQ -->|Axios JSON HTTP| App
-  RHF -->|validate| ZS
-  Val -->|validate| ZS
+  TQ --> Axios
+  Axios -->|JSON HTTP / Vercel Proxy| App
   App --> MW
   MW --> Val
+  Val -->|validate| ZS
   Val --> Ctrl
   Ctrl --> Repo
-  Repo --> P
+  Repo -->|Atomic SQL Decrements| P
   P --> DB
 ```
 
@@ -94,11 +97,12 @@ graph TD
 
 ## 📂 Monorepo Structure
 
-- [`shared/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/shared): Common models, schemas, and error definitions.
-- [`client/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/client): Vite + React frontend code.
-- [`server/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/server): Express.js + Prisma backend code.
+- [`shared/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/shared): Common TypeScript types, validation models, schemas, and system constants.
+- [`client/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/client): Vite + React frontend single-page application.
+- [`server/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/server): Express.js REST API server with Prisma ORM and repository layer.
+- [`.github/workflows/ci.yml`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/.github/workflows/ci.yml): GitHub Actions automated CI workflow.
 
-For a detailed walkthrough of the directories, see the [Folder Structure Documentation](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/docs/FOLDER_STRUCTURE.md).
+For a detailed walkthrough of the workspace structure, see the [Folder Structure Documentation](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/docs/FOLDER_STRUCTURE.md).
 
 ---
 
@@ -106,9 +110,9 @@ For a detailed walkthrough of the directories, see the [Folder Structure Documen
 
 ### Prerequisites
 
-- Node.js (v18+)
-- npm (v8+)
-- PostgreSQL 15+
+- Node.js (v20+)
+- npm (v9+)
+- PostgreSQL 15+ (Local or Cloud Neon PostgreSQL)
 
 ### Installation
 
@@ -119,7 +123,7 @@ For a detailed walkthrough of the directories, see the [Folder Structure Documen
    ```
 2. Install workspace dependencies:
    ```bash
-   npm install
+   npm ci --legacy-peer-deps
    ```
 3. Compile the shared types library:
    ```bash
@@ -130,88 +134,81 @@ For a detailed walkthrough of the directories, see the [Folder Structure Documen
 
 ## ⚙️ Environment Variables
 
-Create a `.env` file in the [`server/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/server) directory.
+Create a `.env` file in the [`server/`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/server) directory:
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/analyticiq?schema=public"
+DATABASE_URL="postgresql://neondb_owner:password@ep-sample.aws.neon.tech/neondb?sslmode=require"
 PORT=5000
 NODE_ENV="development"
-JWT_SECRET="your-super-secure-jwt-key"
+JWT_SECRET="ci-test-secret-please-override-in-real-envs-1234567890"
+CORS_ORIGIN="http://localhost:3000"
 ```
 
 ---
 
 ## 💻 Running Locally
 
-### 1. Run PostgreSQL Server
+### 1. Database Setup & Prisma Migrations
 
-Ensure PostgreSQL is running locally on port 5432.
-
-### 2. Apply Migrations & Generate Client
-
-Apply schema migrations and generate the Prisma client:
+Apply schema migrations to your local or Neon PostgreSQL instance:
 
 ```bash
-# Run migrations in development (interactive)
-npm run prisma:migrate --workspace=server
+# Generate Prisma Client
+npx prisma generate --schema=server/prisma/schema.prisma
 
-# Or deploy existing migrations directly to a new/production database (non-interactive)
+# Deploy database migrations
 npx prisma migrate deploy --schema=server/prisma/schema.prisma
-
-# Or reset development database and apply all migrations from scratch
-npx prisma migrate reset --force --schema=server/prisma/schema.prisma
 ```
 
-### 3. Run Applications
-
-Run the client and server concurrently in development mode:
+### 2. Run Application Components
 
 ```bash
-# Terminal 1: Run Backend (Port 5000)
-npm run dev:server
+# Option A: Build and test full monorepo
+npm run build
+npm run test --workspace=server
+npm run lint
 
-# Terminal 2: Run Frontend (Port 3000)
-npm run dev:client
+# Option B: Run concurrent dev servers
+npm run dev:server    # Backend API on Port 5000
+npm run dev:client    # Frontend App on Port 3000
 ```
 
 ---
 
-## 🖥️ Screen Views
+## 🌐 Production Cloud Deployment
 
-_Visual walkthroughs of key components inside AnalyticxIQ:_
+### Backend (Render)
+- Configured via [`render.yaml`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/render.yaml).
+- Build command: `npm ci --legacy-peer-deps && npm run build:shared && npm run build:server`
+- Start command: `node server/dist/server.js`
+- Requires Environment Variables set on Render: `DATABASE_URL`, `JWT_SECRET` (32+ chars), `CORS_ORIGIN`.
 
-|                 Dashboard Overview                  |                  Sales Ingestion (CSV)                  |
-| :-------------------------------------------------: | :-----------------------------------------------------: |
-| ![Dashboard Mockup](docs/screenshots/dashboard.png) | ![CSV Ingestion Mockup](docs/screenshots/ingestion.png) |
-
-_(Real application view captures are available in the [Walkthrough report](file:///C:/Users/ckish/.gemini/antigravity-ide/brain/3617fae0-0c70-44ba-aacf-e2756bc68892/walkthrough.md))_
+### Frontend (Vercel)
+- Configured via [`vercel.json`](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/vercel.json).
+- Build command: `npm ci --legacy-peer-deps && npm run build:shared && npm run build:client`
+- Output directory: `client/dist`
+- API rewrites configured to point `/api/:path*` to Render backend instance.
 
 ---
 
 ## 🔌 API Endpoints Summary
 
-| Endpoint                     |     Method     |  Auth   | Description                           |
-| :--------------------------- | :------------: | :-----: | :------------------------------------ |
-| `/api/v1/auth/register`      |     `POST`     | Public  | Register new tenant and owner         |
-| `/api/v1/auth/login`         |     `POST`     | Public  | Authenticate user and return token    |
-| `/api/v1/auth/me`            |     `GET`      | Private | Retrieve active user session info     |
-| `/api/v1/products`           | `GET` / `POST` | Private | List or create products               |
-| `/api/v1/customers`          | `GET` / `POST` | Private | List or create customers              |
-| `/api/v1/sales`              | `GET` / `POST` | Private | List or create sales transactions     |
-| `/api/v1/analytics/advanced` |     `GET`      | Private | Fetch aggregate business intelligence |
-| `/api/v1/import/products`    |     `POST`     | Private | Batch upload products from CSV        |
-| `/api/v1/export/sales`       |     `GET`      | Private | Download sales logs                   |
+| Endpoint                     |     Method     |      Auth Required      | Description                           |
+| :--------------------------- | :------------: | :---------------------: | :------------------------------------ |
+| `/api/v1/auth/register`      |     `POST`     |         Public          | Register new business tenant & owner  |
+| `/api/v1/auth/login`         |     `POST`     |         Public          | Authenticate user and issue JWT token |
+| `/api/v1/auth/me`            |     `GET`      |         Private         | Retrieve active user session info     |
+| `/api/v1/products`           | `GET` / `POST` |         Private         | List or create catalog products       |
+| `/api/v1/products/:id`       |    `DELETE`    | Private (`OWNER/ADMIN`) | Delete catalog product by ID          |
+| `/api/v1/customers`          | `GET` / `POST` |         Private         | List or create customer records       |
+| `/api/v1/customers/:id`      |    `DELETE`    | Private (`OWNER/ADMIN`) | Delete customer record by ID          |
+| `/api/v1/sales`              | `GET` / `POST` |         Private         | List or record sales transactions     |
+| `/api/v1/sales/:id`          |    `DELETE`    | Private (`OWNER/ADMIN`) | Void sale and restore product stock   |
+| `/api/v1/analytics/advanced` |     `GET`      |         Private         | Fetch aggregate BI dashboard metrics  |
+| `/api/v1/import/products`    |     `POST`     |         Private         | Batch upload products from CSV/XLSX   |
+| `/api/v1/export/sales`       |     `GET`      |         Private         | Export sales records (CSV/XLSX/PDF)   |
 
-Refer to the complete [API Documentation](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/docs/API_DOCUMENTATION.md) for request/response schemas.
-
----
-
-## 🔮 Future Improvements
-
-1.  **Granular Role-Based Access Control (RBAC)**: Support separate permissions for `MEMBER` and `ADMIN` roles.
-2.  **Multi-Currency Support**: Dynamic currency conversions for global sales pipelines.
-3.  **Real-time Live Charts**: Integrating Socket.io to sync dashboard data on new sales without manual page refresh.
-4.  **Webhooks**: Build automated endpoints to notify third-party shipping or accounting services on transaction completions.
+Refer to the complete [API Documentation](file:///c:/Users/ckish/OneDrive/Desktop/AnalyticxIQ/docs/API_DOCUMENTATION.md) for full request/response payloads.
 
 ---
 
