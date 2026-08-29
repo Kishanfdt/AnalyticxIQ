@@ -32,5 +32,13 @@
     "prettier": "^3.2.5",
     "typescript": "^5.2.2",
     "typescript-eslint": "^7.5.0"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.17.25",
+    "caniuse-lite": "^1.0.30001810",
+    "es-abstract": "1.23.9",
+    "lodash": "^4.18.1",
+    "lucide-react": "^1.37.0",
+    "object.fromentries": "^2.0.8"
   }
 }
