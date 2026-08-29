@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { ProductController } from '../controllers/product.controller.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 import { validateRequest } from '../middleware/validate.js';
 import { createProductSchema, updateProductSchema } from '@analyticiq/shared';
+import { UserRole } from '@prisma/client';
 
 const router = Router();
 
@@ -14,6 +15,6 @@ router.post('/', validateRequest(createProductSchema), ProductController.create)
 router.get('/', ProductController.getAll);
 router.get('/:id', ProductController.getById);
 router.put('/:id', validateRequest(updateProductSchema), ProductController.update);
-router.delete('/:id', ProductController.delete);
+router.delete('/:id', requireRole(UserRole.OWNER, UserRole.ADMIN), ProductController.delete);
 
 export default router;
