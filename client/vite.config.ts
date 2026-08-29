@@ -6,9 +6,10 @@ import { fileURLToPath, URL } from 'url';
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-    },
+    alias: [
+      { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
+      { find: /^lodash\/(.*)$/, replacement: 'lodash-es/$1' },
+    ],
   },
   server: {
     port: 3000,
