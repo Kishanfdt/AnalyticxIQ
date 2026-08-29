@@ -5,6 +5,33 @@ import { AppError } from '../utils/errors.js';
 import { ERROR_CODES } from '@analyticiq/shared';
 import * as XLSX from 'xlsx';
 
+function escapeHtml(str: any): string {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function sanitizeCell(val: any): any {
+  if (typeof val === 'string' && ['=', '+', '-', '@'].some((char) => val.startsWith(char))) {
+    return `'${val}`;
+  }
+  return val;
+}
+
+function sanitizeData<T extends Record<string, any>>(rows: T[]): T[] {
+  return rows.map((row) => {
+    const sanitized: any = {};
+    for (const [key, val] of Object.entries(row)) {
+      sanitized[key] = sanitizeCell(val);
+    }
+    return sanitized;
+  });
+}
+
 export class ExportController {
   /**
    * Helper utility to build query filters for data fetching
@@ -63,17 +90,19 @@ export class ExportController {
           orderBy: { name: 'asc' },
         });
 
-        data = products.map((p) => ({
-          ID: p.id,
-          Name: p.name,
-          SKU: p.sku,
-          Price: Number(p.price),
-          CostPrice: p.costPrice ? Number(p.costPrice) : 0,
-          Stock: p.stock,
-          Category: p.category?.name || 'Uncategorized',
-          Description: p.description || '',
-          CreatedAt: p.createdAt.toISOString(),
-        }));
+        data = sanitizeData(
+          products.map((p) => ({
+            ID: p.id,
+            Name: p.name,
+            SKU: p.sku,
+            Price: Number(p.price),
+            CostPrice: p.costPrice ? Number(p.costPrice) : 0,
+            Stock: p.stock,
+            Category: p.category?.name || 'Uncategorized',
+            Description: p.description || '',
+            CreatedAt: p.createdAt.toISOString(),
+          })),
+        );
 
         const ws = XLSX.utils.json_to_sheet(data);
         XLSX.utils.book_append_sheet(workbook, ws, 'Products');
@@ -93,17 +122,19 @@ export class ExportController {
           orderBy: { name: 'asc' },
         });
 
-        data = customers.map((c) => ({
-          ID: c.id,
-          Name: c.name,
-          Email: c.email || '',
-          Phone: c.phone || '',
-          Company: c.company || '',
-          Region: c.region || 'Unknown',
-          Address: c.address || '',
-          Notes: c.notes || '',
-          CreatedAt: c.createdAt.toISOString(),
-        }));
+        data = sanitizeData(
+          customers.map((c) => ({
+            ID: c.id,
+            Name: c.name,
+            Email: c.email || '',
+            Phone: c.phone || '',
+            Company: c.company || '',
+            Region: c.region || 'Unknown',
+            Address: c.address || '',
+            Notes: c.notes || '',
+            CreatedAt: c.createdAt.toISOString(),
+          })),
+        );
 
         const ws = XLSX.utils.json_to_sheet(data);
         XLSX.utils.book_append_sheet(workbook, ws, 'Customers');
@@ -123,22 +154,24 @@ export class ExportController {
         });
 
         // Flatten sales and sale items for flat tables
-        data = sales.flatMap((s) => {
-          return s.items.map((item) => ({
-            SaleID: s.id,
-            SaleDate: s.saleDate.toISOString().split('T')[0],
-            CustomerName: s.customer?.name || 'Private Buyer',
-            CustomerEmail: s.customer?.email || '',
-            Status: s.status,
-            ProductName: item.product.name,
-            ProductSKU: item.product.sku,
-            Quantity: item.quantity,
-            UnitPrice: Number(item.unitPrice),
-            DiscountPercent: Number(item.discount),
-            Subtotal: item.quantity * Number(item.unitPrice),
-            SaleTotalAmount: Number(s.totalAmount),
-          }));
-        });
+        data = sanitizeData(
+          sales.flatMap((s) => {
+            return s.items.map((item) => ({
+              SaleID: s.id,
+              SaleDate: s.saleDate.toISOString().split('T')[0],
+              CustomerName: s.customer?.name || 'Private Buyer',
+              CustomerEmail: s.customer?.email || '',
+              Status: s.status,
+              ProductName: item.product.name,
+              ProductSKU: item.product.sku,
+              Quantity: item.quantity,
+              UnitPrice: Number(item.unitPrice),
+              DiscountPercent: Number(item.discount),
+              Subtotal: item.quantity * Number(item.unitPrice),
+              SaleTotalAmount: Number(s.totalAmount),
+            }));
+          }),
+        );
 
         const ws = XLSX.utils.json_to_sheet(data);
         XLSX.utils.book_append_sheet(workbook, ws, 'Sales Ledger');
@@ -159,7 +192,7 @@ export class ExportController {
         const result = await AnalyticsService.getAdvancedAnalytics(businessId, filters);
 
         // Bundle into multi-sheet Excel file
-        const summary = [
+        const summary = sanitizeData([
           { Metric: 'Gross Revenue', Value: result.grossRevenue },
           { Metric: 'Net Revenue', Value: result.netRevenue },
           { Metric: 'Total Profit', Value: result.profit },
@@ -168,18 +201,18 @@ export class ExportController {
           { Metric: 'Average Order Value', Value: result.averageOrderValue },
           { Metric: 'Customer Purchase Frequency', Value: result.customerPurchaseFrequency },
           { Metric: 'MoM Growth (%)', Value: result.revenueGrowth },
-        ];
+        ]);
 
         const sWS = XLSX.utils.json_to_sheet(summary);
         XLSX.utils.book_append_sheet(workbook, sWS, 'Summary KPIs');
 
-        const pWS = XLSX.utils.json_to_sheet(result.topPerformingProducts);
+        const pWS = XLSX.utils.json_to_sheet(sanitizeData(result.topPerformingProducts));
         XLSX.utils.book_append_sheet(workbook, pWS, 'Top Products');
 
-        const cWS = XLSX.utils.json_to_sheet(result.topCustomers);
+        const cWS = XLSX.utils.json_to_sheet(sanitizeData(result.topCustomers));
         XLSX.utils.book_append_sheet(workbook, cWS, 'Top Customers');
 
-        const tWS = XLSX.utils.json_to_sheet(result.salesTrend);
+        const tWS = XLSX.utils.json_to_sheet(sanitizeData(result.salesTrend));
         XLSX.utils.book_append_sheet(workbook, tWS, 'Monthly Trends');
 
         // Set flat data for CSV output format (uses Summary sheet)
@@ -214,8 +247,8 @@ export class ExportController {
         return res.status(200).send(buffer);
       } else if (format === 'pdf') {
         // Output print-friendly HTML view. Browser handles saving as PDF.
-        const title = `${resource.toUpperCase()} REPORT`;
-        const dateRangeStr = `${req.query.startDate || 'All Time'} to ${req.query.endDate || 'Present'}`;
+        const title = `${escapeHtml(resource.toUpperCase())} REPORT`;
+        const dateRangeStr = `${escapeHtml(req.query.startDate || 'All Time')} to ${escapeHtml(req.query.endDate || 'Present')}`;
 
         let rowsHtml = '';
         if (data.length > 0) {
@@ -224,7 +257,7 @@ export class ExportController {
             <table class="report-table">
               <thead>
                 <tr>
-                  ${headers.map((h) => `<th>${h}</th>`).join('')}
+                  ${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join('')}
                 </tr>
               </thead>
               <tbody>
@@ -232,7 +265,7 @@ export class ExportController {
                   .map(
                     (row) => `
                   <tr>
-                    ${headers.map((h) => `<td>${row[h]}</td>`).join('')}
+                    ${headers.map((h) => `<td>${escapeHtml(row[h])}</td>`).join('')}
                   </tr>
                 `,
                   )
