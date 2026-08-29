@@ -83,7 +83,10 @@ export class ProductRepository {
    */
   public static async findBySku(sku: string, businessId: string) {
     return prisma.product.findFirst({
-      where: { sku, businessId },
+      where: {
+        sku: { equals: sku, mode: 'insensitive' },
+        businessId,
+      },
     });
   }
 

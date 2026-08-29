@@ -21,22 +21,24 @@ export class ProductService {
       );
     }
 
-    // 2. Find or create the category if categoryName is provided
+    // 2. Find or create the category if categoryName is provided (case-insensitive)
     let categoryId: string | null = null;
     if (categoryName) {
-      const category = await prisma.category.upsert({
+      let category = await prisma.category.findFirst({
         where: {
-          name_businessId: {
+          name: { equals: categoryName, mode: 'insensitive' },
+          businessId,
+        },
+      });
+
+      if (!category) {
+        category = await prisma.category.create({
+          data: {
             name: categoryName,
             businessId,
           },
-        },
-        create: {
-          name: categoryName,
-          businessId,
-        },
-        update: {},
-      });
+        });
+      }
       categoryId = category.id;
     }
 
@@ -112,23 +114,25 @@ export class ProductService {
       }
     }
 
-    // 3. Find or create Category if categoryName is changed/provided
+    // 3. Find or create Category if categoryName is changed/provided (case-insensitive)
     let categoryId: string | null = product.categoryId;
     if (categoryName !== undefined) {
       if (categoryName) {
-        const category = await prisma.category.upsert({
+        let category = await prisma.category.findFirst({
           where: {
-            name_businessId: {
+            name: { equals: categoryName, mode: 'insensitive' },
+            businessId,
+          },
+        });
+
+        if (!category) {
+          category = await prisma.category.create({
+            data: {
               name: categoryName,
               businessId,
             },
-          },
-          create: {
-            name: categoryName,
-            businessId,
-          },
-          update: {},
-        });
+          });
+        }
         categoryId = category.id;
       } else {
         categoryId = null;
